@@ -1,0 +1,28 @@
+# This determines the command prefix when there are conflicts (/name:home, /name:help, etc.)
+name: NyaMineFeatures
+main: me.galaran.nyamine.NyaMineFeatures
+version: ${project.version}
+description: Sweet features for NyaMine
+depend: [KLibs, Essentials]
+#softdepend: [Vault]
+authors: [Galaran]
+api-version: "1.13"
+#commands:
+#  afk:
+#    description: Marks you as away-from-keyboard.
+#    usage: /<command> [player/message...]
+#    aliases: [eafk,away,eaway]
+
+permissions:
+  nyamine.*:
+    default: op
+    description: Give players with op everything by default
+#  essentials.teleport.cooldown.bypass.tpa:
+#    default: true
+#    description: If the player does not have this permission, /tpa will have cooldown even with the parent bypass perm
+#  essentials.gamemode.*:
+#    default: op
+#    children:
+#      essentials.gamemode: true
+#      essentials.gamemode.others: true
+#      essentials.gamemode.all: true
