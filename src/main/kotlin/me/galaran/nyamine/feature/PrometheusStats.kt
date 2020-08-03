@@ -29,7 +29,7 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
         if (event.block.type in minedBlocksToCount) {
             val playerName = event.player.name
             val playerUUID = event.player.uniqueId.toString()
-            val blockId = event.block.type.toString()
+            val blockId = event.block.type.key.key
 
             val playerStats = db.playerStats.computeIfAbsent(playerUUID, { PlayerStats(playerName) })
             val newCount = playerStats.blocksMined.compute(blockId, { _, count: Int? -> (count ?: 0) + 1 })!!
