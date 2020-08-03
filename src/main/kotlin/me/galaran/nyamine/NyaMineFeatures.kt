@@ -25,13 +25,12 @@ class NyaMineFeatures : JavaPlugin() {
         instance = this
         essentials = getPlugin(Essentials::class.java)
 
-        reloadConf()
-
         Recipes.registerAll()
         server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
         prometheusStats = PrometheusStats(this)
         server.pluginManager.registerEvents(prometheusStats, this)
 
+        reloadConf()
         logger.info("NyaMineFeatures enabled")
     }
 
