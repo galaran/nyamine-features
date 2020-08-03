@@ -19,7 +19,7 @@ class NyaMineFeatures : JavaPlugin() {
 
     private lateinit var essentials: IEssentials
 
-    private val prometheusStats = PrometheusStats(this)
+    private lateinit var prometheusStats: PrometheusStats
 
     override fun onEnable() {
         instance = this
@@ -29,6 +29,7 @@ class NyaMineFeatures : JavaPlugin() {
 
         Recipes.registerAll()
         server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
+        prometheusStats = PrometheusStats(this)
         server.pluginManager.registerEvents(prometheusStats, this)
 
         logger.info("NyaMineFeatures enabled")
@@ -60,7 +61,7 @@ class NyaMineFeatures : JavaPlugin() {
                         if (grade != null) {
                             sender.world.dropItem(sender.eyeLocation, Recipes.createReturnChorusItem(grade))
                             sender.sendMessage(grade.nameColor.toString() + "Ням!")
-                            return true
+                            return true // FIXME: Not works
                         }
                     }
                 } else {

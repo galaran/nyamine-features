@@ -32,9 +32,9 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
             val blockId = event.block.type.toString()
 
             val playerStats = db.playerStats.computeIfAbsent(playerUUID, { PlayerStats(playerName) })
-            val newValue = playerStats.statByKey.compute("block-mined.$blockId", { _, count: Int? -> (count ?: 0) + 1 })!!
+            val newCount = playerStats.blocksMined.compute(blockId, { _, count: Int? -> (count ?: 0) + 1 })!!
 
-            blocksMined.labels(playerName, playerUUID, blockId).set(newValue.toDouble())
+            blocksMined.labels(playerName, playerUUID, blockId).set(newCount.toDouble())
         }
     }
 
@@ -45,7 +45,7 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
 
     @Serializable
     private class PlayerStats(val playerName: String) {
-        var statByKey: MutableMap<String, Int> = mutableMapOf()
+        var blocksMined: MutableMap<String, Int> = mutableMapOf()
     }
 
     private val dbFile = plugin.dataFolder.toPath().resolve("PrometheusStatsDb.json")
@@ -63,11 +63,13 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
             serializer.parse(StatDb.serializer(), Files.readAllBytes(dbFile).toString(Charsets.UTF_8))
         }
 
-        for ((playerUUID, playerStats) in db.playerStats) {
-            for ((stat, value) in playerStats.statByKey) {
-                blocksMined.labels(playerStats.playerName, playerUUID, stat).set(value.toDouble())
+        plugin.server.scheduler.scheduleSyncDelayedTask(plugin, {
+            for ((playerUUID, playerStats) in db.playerStats) {
+                for ((blockId, count) in playerStats.blocksMined) {
+                    blocksMined.labels(playerStats.playerName, playerUUID, blockId).set(count.toDouble())
+                }
             }
-        }
+        }, 30 * 20) // 30 sec
     }
 
     fun saveDb() {
