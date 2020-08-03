@@ -1,3 +1,14 @@
-# NyaMineFeatures configuration file #
+# NyaMineFeatures configuration file
 
-debug: false
+prometheus-stats:
+  mined-blocks-counters:
+    - emerald_ore
+    - diamond_ore
+    - lapis_ore
+    - redstone_ore
+    - gold_ore
+    - iron_ore
+    - coal_ore
+    - nether_quartz_ore
+    - stone
+    - netherrack

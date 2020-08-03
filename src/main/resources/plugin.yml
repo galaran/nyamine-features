@@ -3,15 +3,14 @@ name: NyaMineFeatures
 main: me.galaran.nyamine.NyaMineFeatures
 version: ${project.version}
 description: Sweet features for NyaMine
-depend: [KLibs, Essentials]
-#softdepend: [Vault]
+depend: [KLibs, Essentials, PrometheusExporter]
 authors: [Galaran]
 api-version: "1.13"
-#commands:
-#  afk:
-#    description: Marks you as away-from-keyboard.
-#    usage: /<command> [player/message...]
-#    aliases: [eafk,away,eaway]
+commands:
+  nyamf:
+    description: NyaMineFeatures main command
+    permission: nyamine.admin
+    permission-message: You do not have permission
 
 permissions:
   nyamine.*:

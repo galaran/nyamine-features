@@ -46,7 +46,7 @@ object Recipes {
                 .addIngredient(bookEff10)
     }
 
-    private fun createReturnChorusItem(grade: ReturnChorusGrade): ItemStack {
+    fun createReturnChorusItem(grade: ReturnChorusGrade): ItemStack {
         return ItemStack(Material.CHORUS_FRUIT).apply {
             val meta = this.itemMeta
             meta.setDisplayName(grade.nameColor.toString() + grade.displayName)
