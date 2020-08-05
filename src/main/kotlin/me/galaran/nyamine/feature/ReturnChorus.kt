@@ -7,7 +7,9 @@ import net.ess3.api.IEssentials
 import org.bukkit.Effect
 import org.bukkit.Material
 import org.bukkit.Sound
+import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -79,4 +81,22 @@ class ReturnChorus(
             event.player.discoverRecipe(Recipes.RETURN_CHORUS_INSTANT)
         }
     }
+
+    fun onChorusCommand(sender: CommandSender, levelArg: String): Boolean {
+        if (sender !is Player) {
+            sender.sendMessage("Error! Must be executed as a Player")
+            return true
+        }
+
+        val grade = ReturnChorusGrade.values().find { it.enchantLevel.toString() == levelArg }
+        return if (grade != null) {
+            sender.world.dropItem(sender.eyeLocation, Recipes.createReturnChorusItem(grade))
+            sender.sendMessage("${grade.nameColor}Ням!")
+            true
+        } else {
+            false
+        }
+    }
+
+    fun onChorusCommandComplete() = listOf("1", "5", "10")
 }

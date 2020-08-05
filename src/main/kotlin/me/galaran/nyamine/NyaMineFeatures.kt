@@ -7,7 +7,6 @@ import net.ess3.api.IEssentials
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 
@@ -19,14 +18,16 @@ class NyaMineFeatures : JavaPlugin() {
 
     private lateinit var essentials: IEssentials
 
+    private lateinit var returnChorus: ReturnChorus
     private lateinit var prometheusStats: PrometheusStats
 
     override fun onEnable() {
         instance = this
         essentials = getPlugin(Essentials::class.java)
 
+        returnChorus = ReturnChorus(this, essentials)
         Recipes.registerAll()
-        server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
+        server.pluginManager.registerEvents(returnChorus, this)
         prometheusStats = PrometheusStats(this)
         server.pluginManager.registerEvents(prometheusStats, this)
 
@@ -46,38 +47,33 @@ class NyaMineFeatures : JavaPlugin() {
         }.toSet()
     }
 
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String>? {
+        if (args.size == 1) return listOf("reload", "chorus")
+        if (args.size == 2 && args.first() == "chorus") return returnChorus.onChorusCommandComplete()
+        return null
+    }
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size == 1) {
-            if (args.first() == "reload") {
-                reloadConf()
-                sender.sendMessage("Configuration reloaded!")
-                return true
-            }
-            if (args.first() == "chorus") {
-                if (sender is Player) {
-                    if (args.size == 2) {
-                        val grade = ReturnChorusGrade.values().find { it.enchantLevel.toString() == args[1] }
-                        if (grade != null) {
-                            sender.world.dropItem(sender.eyeLocation, Recipes.createReturnChorusItem(grade))
-                            sender.sendMessage(grade.nameColor.toString() + "Ням!")
-                            return true // FIXME: Not works
-                        }
-                    }
-                } else {
-                    sender.sendMessage("Error! Must be executed as a Player")
-                    return false
-                }
-            }
+        if (args.size == 1 && args.first() == "reload") {
+            reloadConf()
+            sender.sendMessage("Configuration reloaded!")
+            return true
+        } else if (args.size == 2 && args.first() == "chorus") {
+            if (returnChorus.onChorusCommand(sender, args[1])) return true
         }
 
-        sender.sendMessage("Usage:")
-        sender.sendMessage("/nyamf reload - Reload configuration file")
-        sender.sendMessage("/nyamf chorus (1|5|10) - Gives you teleport chorus fruit")
+        sender.printHelp()
         return false
     }
 
     override fun onDisable() {
         prometheusStats.saveDb()
         logger.info("PrometheusStatsDb saved")
+    }
+
+    private fun CommandSender.printHelp() {
+        sendMessage("Usage:")
+        sendMessage("/nyamf reload - Reload configuration file")
+        sendMessage("/nyamf chorus (1|5|10) - Gives you teleport chorus fruit")
     }
 }
