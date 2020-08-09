@@ -62,14 +62,6 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
         } else {
             StatDb()
         }
-
-        /*plugin.server.scheduler.scheduleSyncDelayedTask(plugin, {
-            for ((playerUUID, playerStats) in db.playerStats) {
-                for ((blockId, count) in playerStats.blocksMined) {
-                    blocksMined.labels(playerStats.playerName, playerUUID, blockId).set(count.toDouble())
-                }
-            }
-        }, 30 * 20) // 30 sec*/
     }
 
     fun saveDb() {

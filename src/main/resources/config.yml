@@ -12,3 +12,7 @@ prometheus-stats:
     - nether_quartz_ore
     - stone
     - netherrack
+    - ancient_debris
+    - netherite_block
+    - nether_gold_ore
+    - gilded_blackstone
