@@ -1,6 +1,7 @@
 package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
+import me.galaran.nyamine.feature.DeathLocation
 import me.galaran.nyamine.feature.PrometheusStats
 import me.galaran.nyamine.feature.ReturnChorus
 import net.ess3.api.IEssentials
@@ -30,6 +31,7 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(returnChorus, this)
         prometheusStats = PrometheusStats(this)
         server.pluginManager.registerEvents(prometheusStats, this)
+        server.pluginManager.registerEvents(DeathLocation(), this)
 
         reloadConf()
         logger.info("NyaMineFeatures enabled")
