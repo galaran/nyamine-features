@@ -36,6 +36,11 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(PlayerListNameColorizer(this), this)
 
         reloadConf()
+
+        server.scheduler.runTaskTimerAsynchronously(this, Runnable {
+            prometheusStats.saveDb()
+        }, 10 * 60 * 20, 10 * 60 * 20) // 10 min
+
         logger.info("NyaMineFeatures enabled")
     }
 

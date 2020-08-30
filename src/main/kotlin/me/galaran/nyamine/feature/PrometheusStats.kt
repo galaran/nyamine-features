@@ -3,7 +3,6 @@ package me.galaran.nyamine.feature
 import io.prometheus.client.Gauge
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import me.galaran.nyamine.NyaMineFeatures
 import org.bukkit.Material
@@ -12,6 +11,9 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class PrometheusStats(plugin: NyaMineFeatures) : Listener {
 
@@ -40,31 +42,38 @@ class PrometheusStats(plugin: NyaMineFeatures) : Listener {
 
     @Serializable
     private class StatDb {
-        var playerStats: MutableMap<String, PlayerStats> = mutableMapOf()
+        var playerStats: MutableMap<String, PlayerStats> = ConcurrentHashMap()
     }
 
     @Serializable
     private class PlayerStats(val playerName: String) {
-        var blocksMined: MutableMap<String, Int> = mutableMapOf()
+        var blocksMined: MutableMap<String, Int> = ConcurrentHashMap()
     }
 
     private val dbFile = plugin.dataFolder.toPath().resolve("PrometheusStatsDb.json")
+    private val dbFileLock = ReentrantLock()
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    private val serializer = Json(JsonConfiguration(prettyPrint = true), SerializersModule {
-        contextual(StatDb::class, StatDb.serializer())
-        contextual(PlayerStats::class, PlayerStats.serializer())
-    })
+    private val serializer = Json {
+        prettyPrint = true
+        serializersModule = SerializersModule {
+            contextual(StatDb::class, StatDb.serializer())
+            contextual(PlayerStats::class, PlayerStats.serializer())
+        }
+    }
 
     init {
-        db = if (Files.exists(dbFile)) {
-            serializer.parse(StatDb.serializer(), Files.readAllBytes(dbFile).toString(Charsets.UTF_8))
-        } else {
-            StatDb()
+        dbFileLock.withLock {
+            db = if (Files.exists(dbFile)) {
+                serializer.decodeFromString(StatDb.serializer(), Files.readAllBytes(dbFile).toString(Charsets.UTF_8))
+            } else {
+                StatDb()
+            }
         }
     }
 
     fun saveDb() {
-        Files.write(dbFile, serializer.stringify(StatDb.serializer(), db).toByteArray())
+        dbFileLock.withLock {
+            Files.write(dbFile, serializer.encodeToString(StatDb.serializer(), db).toByteArray())
+        }
     }
 }

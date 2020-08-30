@@ -3,7 +3,7 @@ name: NyaMineFeatures
 main: me.galaran.nyamine.NyaMineFeatures
 version: ${project.version}
 description: Sweet features for NyaMine
-depend: [KLibs, Essentials, PrometheusExporter]
+depend: [Kotlin, Essentials, PrometheusExporter]
 authors: [Galaran]
 api-version: "1.13"
 commands:
