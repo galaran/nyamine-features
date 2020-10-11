@@ -2,7 +2,7 @@ package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
 import me.galaran.nyamine.feature.DeathLocation
-import me.galaran.nyamine.feature.PlayerListNameColorizer
+import me.galaran.nyamine.feature.PlayerListDecorator
 import me.galaran.nyamine.feature.PrometheusStats
 import me.galaran.nyamine.feature.ReturnChorus
 import net.ess3.api.IEssentials
@@ -18,6 +18,9 @@ class NyaMineFeatures : JavaPlugin() {
         lateinit var instance: NyaMineFeatures
     }
 
+    lateinit var playerStorage: PlayerStorage
+        private set
+
     private lateinit var essentials: IEssentials
 
     private lateinit var returnChorus: ReturnChorus
@@ -27,19 +30,22 @@ class NyaMineFeatures : JavaPlugin() {
         instance = this
         essentials = getPlugin(Essentials::class.java)
 
+        playerStorage = PlayerStorage()
+        playerStorage.reload()
+
         returnChorus = ReturnChorus(this, essentials)
         Recipes.registerAll()
         server.pluginManager.registerEvents(returnChorus, this)
-        prometheusStats = PrometheusStats(this)
+        prometheusStats = PrometheusStats()
         server.pluginManager.registerEvents(prometheusStats, this)
-        server.pluginManager.registerEvents(DeathLocation(), this)
-        server.pluginManager.registerEvents(PlayerListNameColorizer(this), this)
+        server.pluginManager.registerEvents(DeathLocation(this), this)
+        server.pluginManager.registerEvents(PlayerListDecorator(this), this)
 
         reloadConf()
 
         server.scheduler.runTaskTimerAsynchronously(this, Runnable {
-            prometheusStats.saveDb()
-        }, 10 * 60 * 20, 10 * 60 * 20) // 10 min
+            saveAll()
+        }, 5 * 60 * 20, 5 * 60 * 20)  // 5 min
 
         logger.info("NyaMineFeatures enabled")
     }
@@ -75,9 +81,14 @@ class NyaMineFeatures : JavaPlugin() {
         return false
     }
 
-    override fun onDisable() {
+    private fun saveAll() {
+        playerStorage.save()
         prometheusStats.saveDb()
-        logger.info("PrometheusStatsDb saved")
+    }
+
+    override fun onDisable() {
+        saveAll()
+        logger.info("All data saved")
     }
 
     private fun CommandSender.printHelp() {

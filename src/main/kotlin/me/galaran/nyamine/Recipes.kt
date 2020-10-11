@@ -1,5 +1,6 @@
 package me.galaran.nyamine
 
+import me.galaran.nyamine.util.stack
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
