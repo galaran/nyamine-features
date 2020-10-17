@@ -2,6 +2,7 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.Position
+import me.galaran.nyamine.util.TicksToPlayedTextConverter
 import me.galaran.nyamine.util.stripColorCodes
 import me.galaran.nyamine.util.toComponent
 import net.ess3.api.events.AfkStatusChangeEvent
@@ -9,6 +10,7 @@ import net.md_5.bungee.api.ChatColor.*
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
+import org.bukkit.Statistic
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -27,18 +29,17 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                 // TODO
                 // TPS
                 // Ping
-                // Total played
 
                 it.setPlayerListHeaderFooter(arrayOf(
-                        TITLE,
-                        LINE,
-                        LF
+                        TITLE, LF,
+                        LINE, LF
                 ), arrayOf(
                         LF,
                         LF,
                         LF,
-                        locationAndDeathPoint(it),
+                        locationAndDeathPoint(it), LF,
                         LF,
+                        timePlayed(it), LF,
                         LINE,
                 ))
             }
@@ -101,10 +102,15 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         }
     }
 
+    private fun timePlayed(player: Player): BaseComponent {
+        val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
+        return TicksToPlayedTextConverter.convert(ticksPlayed)
+    }
+
     private companion object {
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
-        val TITLE = "NyaMine ^_^\n".toComponent(GRAY)
+        val TITLE = "NyaMine ^_^".toComponent(GRAY)
         val LINE = "===========================================================".toComponent(GRAY)
         val LF = TextComponent("\n")
     }
