@@ -2,6 +2,7 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.Position
+import me.galaran.nyamine.util.NMSUtils
 import me.galaran.nyamine.util.TicksToPlayedTextConverter
 import me.galaran.nyamine.util.stripColorCodes
 import me.galaran.nyamine.util.toComponent
@@ -19,6 +20,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.util.Vector
+import java.util.*
 import kotlin.math.roundToInt
 
 class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
@@ -26,10 +28,6 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
     init {
         plugin.server.scheduler.runTaskTimer(plugin, Runnable {
             Bukkit.getOnlinePlayers().forEach {
-                // TODO
-                // TPS
-                // Ping
-
                 it.setPlayerListHeaderFooter(arrayOf(
                         TITLE, LF,
                         LINE, LF
@@ -39,6 +37,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         LF,
                         locationAndDeathPoint(it), LF,
                         LF,
+                        pingAndTPS(it), LF,
                         timePlayed(it), LF,
                         LINE,
                 ))
@@ -99,6 +98,29 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                     plugin.playerStorage[player].lastDeathPoint = null
                 }
             }
+        }
+    }
+
+    private fun pingAndTPS(player: Player): BaseComponent {
+        val pingMs = NMSUtils.getPingMs(player)
+        val pingColor = when (pingMs) {
+            in 0..49 -> GRAY
+            in 50..399 -> GOLD
+            else -> RED
+        }
+
+        val tpsLastMinute = Bukkit.getTPS()[0]
+        val tpsColor = when {
+            tpsLastMinute >= 18.0 -> GRAY
+            tpsLastMinute >= 13.0 -> GOLD
+            else -> RED
+        }
+
+        return "Ping: ".toComponent(GRAY).apply {
+            addExtra(pingMs.toString().toComponent(pingColor))
+            addExtra("ms                ".toComponent(GRAY))
+            addExtra("%.1f".format(Locale.US, tpsLastMinute).toComponent(tpsColor))
+            addExtra(" TPS".toComponent(GRAY))
         }
     }
 
