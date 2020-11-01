@@ -6,12 +6,12 @@
 
     <groupId>me.galaran.nyamine</groupId>
     <artifactId>nyamine-features</artifactId>
-    <version>1.4.2</version>
+    <version>1.5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin.version>1.4.10</kotlin.version>
     </properties>
 
     <dependencies>

@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatColor.*
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Statistic
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -21,6 +22,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.util.Vector
 import java.util.*
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
@@ -35,14 +37,14 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         LF,
                         LF,
                         LF,
-                        locationAndDeathPoint(it), LF,
+                        speedLocationAndDeathPoint(it), LF,
                         LF,
                         pingAndTPS(it), LF,
                         timePlayed(it), LF,
                         LINE,
                 ))
             }
-        }, 100, 10)
+        }, 100, TICKS_PER_UPDATE)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -72,9 +74,15 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
             World.Environment.THE_END to LIGHT_PURPLE
     )
 
-    private fun locationAndDeathPoint(player: Player): BaseComponent {
+    private fun speedLocationAndDeathPoint(player: Player): BaseComponent {
         val loc = player.location
+
         return TextComponent().apply {
+            calcSpeedBlocksPerSecond(player).let {
+                if (it.absoluteValue > 0.0001) {
+                    addExtra("%.1f      ".format(Locale.US, it))
+                }
+            }
             addExtra(loc.blockX.toString())
             addExtra(" : ".toComponent(GRAY))
             addExtra(loc.blockY.toString())
@@ -129,7 +137,21 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         return TicksToPlayedTextConverter.convert(ticksPlayed)
     }
 
+    private fun calcSpeedBlocksPerSecond(player: Player): Double {
+        val currentLoc = player.location
+        val prevLoc: Location? = prevLocationByPlayerUUID.put(player.uniqueId, currentLoc)
+        return if (prevLoc != null && prevLoc.world == currentLoc.world) {
+            currentLoc.distance(prevLoc) / TICKS_PER_UPDATE.toDouble() * 20.0
+        } else {
+            0.0
+        }
+    }
+
+    private val prevLocationByPlayerUUID = mutableMapOf<UUID, Location>()
+
     private companion object {
+        const val TICKS_PER_UPDATE: Long = 10
+
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
         val TITLE = "NyaMine ^_^".toComponent(GRAY)

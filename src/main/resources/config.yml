@@ -16,3 +16,6 @@ prometheus-stats:
     - netherite_block
     - nether_gold_ore
     - gilded_blackstone
+
+minecart-speed:
+  max-speed-multiplier-with-player-in: 4.0

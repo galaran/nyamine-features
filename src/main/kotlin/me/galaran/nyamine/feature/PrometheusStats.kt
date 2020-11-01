@@ -3,18 +3,21 @@ package me.galaran.nyamine.feature
 import io.prometheus.client.Gauge
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.serializersModuleOf
+import me.galaran.nyamine.ConfigReloadListener
+import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.util.ByPlayerFileStorage
 import me.galaran.nyamine.util.PlayerDataBase
 import org.bukkit.Material
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import java.util.concurrent.ConcurrentHashMap
 
-class PrometheusStats : Listener {
+class PrometheusStats : Listener, ConfigReloadListener {
 
-    var minedBlocksToCount: Set<Material> = setOf()
+    private var minedBlocksToCount: Set<Material> = setOf()
 
     private val blocksMined: Gauge = Gauge.build()
             .name("nyamine_blocks_mined")
@@ -51,5 +54,16 @@ class PrometheusStats : Listener {
     @Serializable
     private class PlayerStats : PlayerDataBase() {
         var blocksMined: MutableMap<String, Int> = ConcurrentHashMap()
+    }
+
+    override fun onConfigReload(config: FileConfiguration) {
+        minedBlocksToCount = config.getStringList("prometheus-stats.mined-blocks-counters").mapNotNull {
+            try {
+                Material.valueOf(it.toUpperCase())
+            } catch (ex: IllegalArgumentException) {
+                NyaMineFeatures.instance.logger.warning("No material with id $it. Check configuration")
+                null
+            }
+        }.toSet()
     }
 }

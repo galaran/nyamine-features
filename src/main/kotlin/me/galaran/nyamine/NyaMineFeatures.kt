@@ -1,12 +1,8 @@
 package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
-import me.galaran.nyamine.feature.DeathLocation
-import me.galaran.nyamine.feature.PlayerListDecorator
-import me.galaran.nyamine.feature.PrometheusStats
-import me.galaran.nyamine.feature.ReturnChorus
+import me.galaran.nyamine.feature.*
 import net.ess3.api.IEssentials
-import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
@@ -26,6 +22,8 @@ class NyaMineFeatures : JavaPlugin() {
     private lateinit var returnChorus: ReturnChorus
     private lateinit var prometheusStats: PrometheusStats
 
+    private val configListeners = mutableListOf<ConfigReloadListener>()
+
     override fun onEnable() {
         instance = this
         essentials = getPlugin(Essentials::class.java)
@@ -38,8 +36,14 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(returnChorus, this)
         prometheusStats = PrometheusStats()
         server.pluginManager.registerEvents(prometheusStats, this)
+        configListeners += prometheusStats
+
         server.pluginManager.registerEvents(DeathLocation(this), this)
         server.pluginManager.registerEvents(PlayerListDecorator(this), this)
+
+        val minecartSpeed = MinecartSpeed()
+        server.pluginManager.registerEvents(minecartSpeed, this)
+        configListeners += minecartSpeed
 
         reloadConf()
 
@@ -52,14 +56,8 @@ class NyaMineFeatures : JavaPlugin() {
 
     private fun reloadConf() {
         saveDefaultConfig()
-        prometheusStats.minedBlocksToCount = config.getStringList("prometheus-stats.mined-blocks-counters").mapNotNull {
-            try {
-                Material.valueOf(it.toUpperCase())
-            } catch (ex: IllegalArgumentException) {
-                logger.warning("No material with id $it. Check configuration")
-                null
-            }
-        }.toSet()
+        reloadConfig()
+        configListeners.forEach { it.onConfigReload(config) }
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String>? {
