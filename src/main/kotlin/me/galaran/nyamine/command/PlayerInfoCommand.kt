@@ -34,6 +34,7 @@ class PlayerInfoCommand(private val essentials: IEssentials) : NyaCommand {
         }
 
         val offlinePlayer = SERVER.getOfflinePlayer(uuid)
+        val isHidden = essentials.getUser(offlinePlayer.uniqueId).isHidden
 
         sender.apply {
             sendMessage("Игрок ".color(WHITE) + offlinePlayer.name!!.color(GREEN))
@@ -41,26 +42,25 @@ class PlayerInfoCommand(private val essentials: IEssentials) : NyaCommand {
             val firstPlayedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(offlinePlayer.firstPlayed), ZoneId.systemDefault())
             sendMessage("    Регистрация ".color(WHITE) + firstPlayedDateTime.format(DATE_FORMATTER).color(DARK_PURPLE))
 
-            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer))
+            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer, isHidden))
 
-            val ticksPlayed = offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-            sendMessage("    Наиграно ".color(WHITE) + TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD))
+            if (!isHidden) {
+                val ticksPlayed = offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
+                sendMessage("    Наиграно ".color(WHITE) + TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD))
+            }
         }
         return true
     }
 
-    private fun lastSeenText(offlinePlayer: OfflinePlayer): TextComponent {
-        val user = essentials.getUser(offlinePlayer.uniqueId)
+    private fun lastSeenText(offlinePlayer: OfflinePlayer, isHidden: Boolean): TextComponent {
         val lastSeenDateTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(
-                        if (user.isHidden) user.lastLogout else offlinePlayer.lastSeen
-                ),
+                Instant.ofEpochMilli(offlinePlayer.lastSeen),
                 ZoneId.systemDefault()
         )
-        return if (!offlinePlayer.isOnline || user.isHidden) {
-            "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK".color(LIGHT_PURPLE)
-        } else {
-            "Онлайн".color(GREEN)
+        return when {
+            isHidden -> lastSeenDateTime.format(DATE_FORMATTER).color(LIGHT_PURPLE)
+            offlinePlayer.isOnline -> "Онлайн".color(GREEN)
+            else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK".color(LIGHT_PURPLE)
         }
     }
 
