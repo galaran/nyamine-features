@@ -1,27 +1,30 @@
-# This determines the command prefix when there are conflicts (/name:home, /name:help, etc.)
 name: NyaMineFeatures
-main: me.galaran.nyamine.NyaMineFeatures
 version: ${project.version}
 description: Sweet features for NyaMine
-depend: [Kotlin, Essentials, PrometheusExporter]
 authors: [Galaran]
+
 api-version: "1.13"
+depend: [Kotlin, Essentials, PrometheusExporter]
+main: me.galaran.nyamine.NyaMineFeatures
+
 commands:
-  nyamf:
-    description: NyaMineFeatures main command
+  nyaadmin:
+    description: NyaMineFeatures admin command
     permission: nyamine.admin
+    permission-message: You do not have permission
+  chorus:
+    description: Gives you return chorus
+    permission: nyamine.chorus
+    permission-message: You do not have permission
+  playerinfo:
+    description: Some player info
+    permission: nyamine.playerinfo
     permission-message: You do not have permission
 
 permissions:
-  nyamine.*:
+  nyamine.admin:
     default: op
-    description: Give players with op everything by default
-#  essentials.teleport.cooldown.bypass.tpa:
-#    default: true
-#    description: If the player does not have this permission, /tpa will have cooldown even with the parent bypass perm
-#  essentials.gamemode.*:
-#    default: op
-#    children:
-#      essentials.gamemode: true
-#      essentials.gamemode.others: true
-#      essentials.gamemode.all: true
+  nyaminechorus:
+    default: op
+  nyamine.playerinfo:
+    default: op

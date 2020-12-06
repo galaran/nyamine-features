@@ -1,6 +1,10 @@
 package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
+import me.galaran.nyamine.command.AdminCommand
+import me.galaran.nyamine.command.ChorusCommand
+import me.galaran.nyamine.command.NyaCommandDispatcher
+import me.galaran.nyamine.command.PlayerInfoCommand
 import me.galaran.nyamine.feature.*
 import net.ess3.api.IEssentials
 import org.bukkit.command.Command
@@ -10,10 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class NyaMineFeatures : JavaPlugin() {
 
-    companion object {
-        lateinit var instance: NyaMineFeatures
-    }
-
     lateinit var playerStorage: PlayerStorage
         private set
 
@@ -22,11 +22,18 @@ class NyaMineFeatures : JavaPlugin() {
     private lateinit var returnChorus: ReturnChorus
     private lateinit var prometheusStats: PrometheusStats
 
+    private lateinit var commandDispatcher: NyaCommandDispatcher
+
     private val configListeners = mutableListOf<ConfigReloadListener>()
 
     override fun onEnable() {
-        instance = this
+        PLUGIN = this
+        SERVER = this.server
+        LOGGER = logger
+
         essentials = getPlugin(Essentials::class.java)
+
+        OfflinePlayerRegistry.init(server.offlinePlayers)
 
         playerStorage = PlayerStorage()
         playerStorage.reload()
@@ -47,6 +54,12 @@ class NyaMineFeatures : JavaPlugin() {
 
         reloadConf()
 
+        commandDispatcher = NyaCommandDispatcher().apply {
+            registerHandler(AdminCommand)
+            registerHandler(ChorusCommand)
+            registerHandler(PlayerInfoCommand)
+        }
+
         server.scheduler.runTaskTimerAsynchronously(this, Runnable {
             saveAll()
         }, 5 * 60 * 20, 5 * 60 * 20)  // 5 min
@@ -54,29 +67,10 @@ class NyaMineFeatures : JavaPlugin() {
         logger.info("NyaMineFeatures enabled")
     }
 
-    private fun reloadConf() {
+    fun reloadConf() {
         saveDefaultConfig()
         reloadConfig()
         configListeners.forEach { it.onConfigReload(config) }
-    }
-
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String>? {
-        if (args.size == 1) return listOf("reload", "chorus")
-        if (args.size == 2 && args.first() == "chorus") return returnChorus.onChorusCommandComplete()
-        return null
-    }
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size == 1 && args.first() == "reload") {
-            reloadConf()
-            sender.sendMessage("Configuration reloaded!")
-            return true
-        } else if (args.size == 2 && args.first() == "chorus") {
-            if (returnChorus.onChorusCommand(sender, args[1])) return true
-        }
-
-        sender.printHelp()
-        return false
     }
 
     private fun saveAll() {
@@ -89,9 +83,11 @@ class NyaMineFeatures : JavaPlugin() {
         logger.info("All data saved")
     }
 
-    private fun CommandSender.printHelp() {
-        sendMessage("Usage:")
-        sendMessage("/nyamf reload - Reload configuration file")
-        sendMessage("/nyamf chorus (1|5|10) - Gives you teleport chorus fruit")
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String>? {
+        return commandDispatcher.onTabComplete(sender, command, args)
+    }
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+        return commandDispatcher.onCommand(sender, command, args)
     }
 }

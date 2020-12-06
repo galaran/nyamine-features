@@ -4,7 +4,7 @@ import io.prometheus.client.Gauge
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.serializersModuleOf
 import me.galaran.nyamine.ConfigReloadListener
-import me.galaran.nyamine.NyaMineFeatures
+import me.galaran.nyamine.LOGGER
 import me.galaran.nyamine.util.ByPlayerFileStorage
 import me.galaran.nyamine.util.PlayerDataBase
 import org.bukkit.Material
@@ -61,7 +61,7 @@ class PrometheusStats : Listener, ConfigReloadListener {
             try {
                 Material.valueOf(it.toUpperCase())
             } catch (ex: IllegalArgumentException) {
-                NyaMineFeatures.instance.logger.warning("No material with id $it. Check configuration")
+                LOGGER.warning("No material with id $it. Check configuration")
                 null
             }
         }.toSet()

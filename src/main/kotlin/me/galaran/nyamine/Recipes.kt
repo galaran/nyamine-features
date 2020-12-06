@@ -11,9 +11,9 @@ import org.bukkit.inventory.ShapelessRecipe
 
 object Recipes {
 
-    val RETURN_CHORUS_COMMON = NamespacedKey(NyaMineFeatures.instance, "return_chorus_common")
-    val RETURN_CHORUS_FAST = NamespacedKey(NyaMineFeatures.instance, "return_chorus_fast")
-    val RETURN_CHORUS_INSTANT = NamespacedKey(NyaMineFeatures.instance, "return_chorus_instant")
+    val RETURN_CHORUS_COMMON = NamespacedKey(PLUGIN, "return_chorus_common")
+    val RETURN_CHORUS_FAST = NamespacedKey(PLUGIN, "return_chorus_fast")
+    val RETURN_CHORUS_INSTANT = NamespacedKey(PLUGIN, "return_chorus_instant")
 
     fun registerAll() {
         Bukkit.addRecipe(returnChorusCommon())

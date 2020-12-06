@@ -2,10 +2,10 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.Position
-import me.galaran.nyamine.util.NMSUtils
-import me.galaran.nyamine.util.TicksToPlayedTextConverter
-import me.galaran.nyamine.util.stripColorCodes
-import me.galaran.nyamine.util.toComponent
+import me.galaran.nyamine.SERVER
+import me.galaran.nyamine.util.*
+import me.galaran.nyamine.util.text.PluralRuForms
+import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
 import net.ess3.api.events.AfkStatusChangeEvent
 import net.md_5.bungee.api.ChatColor.*
 import net.md_5.bungee.api.chat.BaseComponent
@@ -15,6 +15,7 @@ import org.bukkit.Location
 import org.bukkit.Statistic
 import org.bukkit.World
 import org.bukkit.entity.Player
+import org.bukkit.entity.Villager
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -39,7 +40,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         LF,
                         speedLocationAndDeathPoint(it), LF,
                         LF,
-                        pingAndTPS(it), LF,
+                        pingTPSVillagers(it), LF,
                         timePlayed(it), LF,
                         LINE,
                 ))
@@ -79,29 +80,29 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
 
         return TextComponent().apply {
             calcSpeedBlocksPerSecond(player).let {
-                if (it.absoluteValue > 0.0001) {
+                if (it.absoluteValue >= 0.1) {
                     addExtra("%.1f      ".format(Locale.US, it))
                 }
             }
             addExtra(loc.blockX.toString())
-            addExtra(" : ".toComponent(GRAY))
+            addExtra(" : ".color(GRAY))
             addExtra(loc.blockY.toString())
-            addExtra(" : ".toComponent(GRAY))
+            addExtra(" : ".color(GRAY))
             addExtra(loc.blockZ.toString())
 
             val deathPoint: Position? = plugin.playerStorage[player].lastDeathPoint
             if (deathPoint != null) {
                 val distanceToDeathPoint = loc.toVector().distance(Vector(deathPoint.x, deathPoint.y, deathPoint.z))
                 if (distanceToDeathPoint > REMOVE_DEATH_POINT_WITHIN_DISTANCE) {
-                    addExtra("    Last death: ".toComponent(RED))
+                    addExtra("    Last death: ".color(RED))
                     addExtra(deathPoint.x.roundToInt().toString())
                     addExtra(" ")
                     addExtra(deathPoint.y.roundToInt().toString())
                     addExtra(" ")
                     addExtra(deathPoint.z.roundToInt().toString())
-                    addExtra("  ~  ".toComponent(RED))
+                    addExtra("  ~  ".color(RED))
                     addExtra(distanceToDeathPoint.roundToInt().toString())
-                    addExtra("m".toComponent(RED))
+                    addExtra("m".color(RED))
                 } else if (!player.isDead) {
                     plugin.playerStorage[player].lastDeathPoint = null
                 }
@@ -109,7 +110,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         }
     }
 
-    private fun pingAndTPS(player: Player): BaseComponent {
+    private fun pingTPSVillagers(player: Player): BaseComponent {
         val pingMs = NMSUtils.getPingMs(player)
         val pingColor = when (pingMs) {
             in 0..49 -> GRAY
@@ -124,17 +125,30 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
             else -> RED
         }
 
-        return "Ping: ".toComponent(GRAY).apply {
-            addExtra(pingMs.toString().toComponent(pingColor))
-            addExtra("ms                ".toComponent(GRAY))
-            addExtra("%.1f".format(Locale.US, tpsLastMinute).toComponent(tpsColor))
-            addExtra(" TPS".toComponent(GRAY))
-        }
+        val totalVillagers = SERVER.worlds
+                .asSequence()
+                .map { it.getEntitiesByClass(Villager::class.java).size }
+                .sum()
+        val villagersTextComponent = if (totalVillagers > 0) {
+            val color = when (totalVillagers) {
+                in 1..39 -> GRAY
+                in 40..79 -> GOLD
+                else -> RED
+            }
+            "      $totalVillagers ${PluralRuForms.VILLAGER.forValue(totalVillagers)}".color(color)
+        } else null
+
+        return "Ping: ".color(GRAY) +
+                pingMs.color(pingColor) +
+                "ms           ".color(GRAY) +
+                "%.1f".format(Locale.US, tpsLastMinute).color(tpsColor) +
+                " TPS".color(GRAY)
+                        .appendNonNull(villagersTextComponent)
     }
 
     private fun timePlayed(player: Player): BaseComponent {
         val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-        return TicksToPlayedTextConverter.convert(ticksPlayed)
+        return ("Наиграно " + TicksToPlayedTextConverter.convert(ticksPlayed)).color(GRAY)
     }
 
     private fun calcSpeedBlocksPerSecond(player: Player): Double {
@@ -154,8 +168,8 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
 
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
-        val TITLE = "NyaMine ^_^".toComponent(GRAY)
-        val LINE = "===========================================================".toComponent(GRAY)
+        val TITLE = "NyaMine ^_^".color(GRAY)
+        val LINE = "==============================================".color(GRAY)
         val LF = TextComponent("\n")
     }
 }

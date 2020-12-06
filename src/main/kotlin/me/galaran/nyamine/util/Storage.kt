@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
 import kotlinx.serialization.modules.serializersModuleOf
-import me.galaran.nyamine.NyaMineFeatures
+import me.galaran.nyamine.PLUGIN
 import org.bukkit.entity.Player
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
@@ -28,7 +28,7 @@ open class FileStorage<T : Any>(
         this.serializersModule = serializersModule
     }
 
-    private val file = NyaMineFeatures.instance.dataFolder.toPath().resolve(fileName)
+    private val file = PLUGIN.dataFolder.toPath().resolve(fileName)
     private val fileLock = ReentrantLock()
 
     fun reload() {
