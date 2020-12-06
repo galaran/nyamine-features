@@ -1,6 +1,5 @@
 package me.galaran.nyamine.command
 
-import com.earth2me.essentials.IEssentials
 import me.galaran.nyamine.OfflinePlayerRegistry
 import me.galaran.nyamine.SERVER
 import me.galaran.nyamine.util.color
@@ -16,12 +15,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class PlayerInfoCommand(private val essentials: IEssentials) : NyaCommand {
+object PlayerInfoCommand : NyaCommand {
 
-    private companion object {
-        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-    }
+    private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    private val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
         if (args.size != 1) return false
@@ -34,33 +31,42 @@ class PlayerInfoCommand(private val essentials: IEssentials) : NyaCommand {
         }
 
         val offlinePlayer = SERVER.getOfflinePlayer(uuid)
-        val isHidden = essentials.getUser(offlinePlayer.uniqueId).isHidden
 
         sender.apply {
-            sendMessage("Игрок ".color(WHITE) + offlinePlayer.name!!.color(GREEN))
-
-            val firstPlayedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(offlinePlayer.firstPlayed), ZoneId.systemDefault())
-            sendMessage("    Регистрация ".color(WHITE) + firstPlayedDateTime.format(DATE_FORMATTER).color(DARK_PURPLE))
-
-            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer, isHidden))
-
-            if (!isHidden) {
-                val ticksPlayed = offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-                sendMessage("    Наиграно ".color(WHITE) + TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD))
-            }
+            sendMessage("Игрок ".color(WHITE) + offlinePlayer.name!!.color(if (offlinePlayer.isOp) RED else GREEN))
+            sendMessage("    Регистрация ".color(WHITE) + firstPlayedText(offlinePlayer))
+            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer))
+            sendMessage("    Наиграно ".color(WHITE) + totalPlayedText(offlinePlayer))
         }
         return true
     }
 
-    private fun lastSeenText(offlinePlayer: OfflinePlayer, isHidden: Boolean): TextComponent {
+    private fun firstPlayedText(offlinePlayer: OfflinePlayer): TextComponent {
+        val firstPlayedDateTime = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(offlinePlayer.firstPlayed),
+                ZoneId.systemDefault()
+        )
+        return firstPlayedDateTime.format(DATE_FORMATTER).color(DARK_PURPLE)
+    }
+
+    private fun lastSeenText(offlinePlayer: OfflinePlayer): TextComponent {
         val lastSeenDateTime = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(offlinePlayer.lastSeen),
                 ZoneId.systemDefault()
         )
         return when {
-            isHidden -> lastSeenDateTime.format(DATE_FORMATTER).color(LIGHT_PURPLE)
+            offlinePlayer.isOp -> "<скрыто>".color(DARK_RED)
             offlinePlayer.isOnline -> "Онлайн".color(GREEN)
             else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK".color(LIGHT_PURPLE)
+        }
+    }
+
+    private fun totalPlayedText(offlinePlayer: OfflinePlayer): TextComponent {
+        return if (offlinePlayer.isOp) {
+            "<скрыто>".color(DARK_RED)
+        } else {
+            val ticksPlayed = offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
+            TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD)
         }
     }
 

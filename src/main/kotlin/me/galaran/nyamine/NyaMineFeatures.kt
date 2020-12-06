@@ -57,7 +57,7 @@ class NyaMineFeatures : JavaPlugin() {
         commandDispatcher = NyaCommandDispatcher().apply {
             registerHandler(AdminCommand)
             registerHandler(ChorusCommand)
-            registerHandler(PlayerInfoCommand(essentials))
+            registerHandler(PlayerInfoCommand)
         }
 
         server.scheduler.runTaskTimerAsynchronously(this, Runnable {
