@@ -35,37 +35,37 @@ object PlayerInfoCommand : NyaCommand {
         sender.apply {
             sendMessage("Игрок ".color(WHITE) + offlinePlayer.name!!.color(if (offlinePlayer.isOp) RED else GREEN))
             sendMessage("    Регистрация ".color(WHITE) + firstPlayedText(offlinePlayer))
-            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer))
-            sendMessage("    Наиграно ".color(WHITE) + totalPlayedText(offlinePlayer))
+            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer, sender))
+            sendMessage("    Наиграно ".color(WHITE) + totalPlayedText(offlinePlayer, sender))
         }
         return true
     }
 
-    private fun firstPlayedText(offlinePlayer: OfflinePlayer): TextComponent {
+    private fun firstPlayedText(target: OfflinePlayer): TextComponent {
         val firstPlayedDateTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(offlinePlayer.firstPlayed),
+                Instant.ofEpochMilli(target.firstPlayed),
                 ZoneId.systemDefault()
         )
         return firstPlayedDateTime.format(DATE_FORMATTER).color(DARK_PURPLE)
     }
 
-    private fun lastSeenText(offlinePlayer: OfflinePlayer): TextComponent {
+    private fun lastSeenText(target: OfflinePlayer, caller: CommandSender): TextComponent {
         val lastSeenDateTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(offlinePlayer.lastSeen),
+                Instant.ofEpochMilli(target.lastSeen),
                 ZoneId.systemDefault()
         )
         return when {
-            offlinePlayer.isOp -> "<скрыто>".color(DARK_RED)
-            offlinePlayer.isOnline -> "Онлайн".color(GREEN)
+            target.isOp && !caller.isOp -> "<скрыто>".color(DARK_RED)
+            target.isOnline -> "Онлайн".color(GREEN)
             else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK".color(LIGHT_PURPLE)
         }
     }
 
-    private fun totalPlayedText(offlinePlayer: OfflinePlayer): TextComponent {
-        return if (offlinePlayer.isOp) {
+    private fun totalPlayedText(target: OfflinePlayer, caller: CommandSender): TextComponent {
+        return if (target.isOp && !caller.isOp) {
             "<скрыто>".color(DARK_RED)
         } else {
-            val ticksPlayed = offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
+            val ticksPlayed = target.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
             TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD)
         }
     }
