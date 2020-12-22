@@ -125,6 +125,13 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
             else -> RED
         }
 
+        val medianTickTimeMs = Bukkit.getTickTimes().sortedArray().let { it[it.size / 2] } / 1_000_000
+        val medianTickTimeColor = when {
+            medianTickTimeMs >= 75 -> RED
+            medianTickTimeMs >= 45 -> GOLD
+            else -> GRAY
+        }
+
         val totalVillagers = SERVER.worlds
                 .asSequence()
                 .map { it.getEntitiesByClass(Villager::class.java).size }
@@ -136,13 +143,15 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                 else -> RED
             }
             "      $totalVillagers ${PluralRuForms.VILLAGER.forValue(totalVillagers)}".color(color)
-        } else null
+        } else {
+            null
+        }
 
         return "Ping: ".color(GRAY) +
                 pingMs.color(pingColor) +
                 "ms           ".color(GRAY) +
                 "%.1f".format(Locale.US, tpsLastMinute).color(tpsColor) +
-                " TPS".color(GRAY)
+                " TPS (".color(GRAY) + medianTickTimeMs.color(medianTickTimeColor) + "ms/tick)".color(GRAY)
                         .appendNonNull(villagersTextComponent)
     }
 
