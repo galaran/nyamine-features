@@ -3,10 +3,14 @@ package me.galaran.nyamine.feature
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.Position
 import me.galaran.nyamine.SERVER
-import me.galaran.nyamine.util.*
+import me.galaran.nyamine.util.appendNonNull
+import me.galaran.nyamine.util.color
+import me.galaran.nyamine.util.plus
+import me.galaran.nyamine.util.stripColorCodes
 import me.galaran.nyamine.util.text.PluralRuForms
 import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
 import net.ess3.api.events.AfkStatusChangeEvent
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatColor.*
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
@@ -30,6 +34,11 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
 
     init {
         plugin.server.scheduler.runTaskTimer(plugin, Runnable {
+            // Server metrics
+            val tpsLastMinute = tpsLastMinute()
+            val medianTickTimeMs = medianTickTimeMs()
+            val totalVillagers = totalVillagers()
+
             Bukkit.getOnlinePlayers().forEach {
                 it.setPlayerListHeaderFooter(arrayOf(
                         TITLE, LF,
@@ -40,7 +49,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         LF,
                         speedLocationAndDeathPoint(it), LF,
                         LF,
-                        pingTPSVillagers(it), LF,
+                        performanceInfo(playerPingMs(it), tpsLastMinute, medianTickTimeMs, totalVillagers), LF,
                         timePlayed(it), LF,
                         LINE,
                 ))
@@ -110,48 +119,20 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         }
     }
 
-    private fun pingTPSVillagers(player: Player): BaseComponent {
-        val pingMs = NMSUtils.getPingMs(player)
-        val pingColor = when (pingMs) {
-            in 0..49 -> GRAY
-            in 50..399 -> GOLD
-            else -> RED
-        }
-
-        val tpsLastMinute = Bukkit.getTPS()[0]
-        val tpsColor = when {
-            tpsLastMinute >= 18.0 -> GRAY
-            tpsLastMinute >= 13.0 -> GOLD
-            else -> RED
-        }
-
-        val medianTickTimeMs = Bukkit.getTickTimes().sortedArray().let { it[it.size / 2] } / 1_000_000
-        val medianTickTimeColor = when {
-            medianTickTimeMs >= 75 -> RED
-            medianTickTimeMs >= 45 -> GOLD
-            else -> GRAY
-        }
-
-        val totalVillagers = SERVER.worlds
-                .asSequence()
-                .map { it.getEntitiesByClass(Villager::class.java).size }
-                .sum()
-        val villagersTextComponent = if (totalVillagers > 0) {
-            val color = when (totalVillagers) {
-                in 1..39 -> GRAY
-                in 40..79 -> GOLD
-                else -> RED
-            }
-            "      $totalVillagers ${PluralRuForms.VILLAGER.forValue(totalVillagers)}".color(color)
+    private fun performanceInfo(playerPingMs: ColoredValue<Int>,
+                                tpsLastMinute: ColoredValue<Double>,
+                                medianTickTimeMs: ColoredValue<Int>,
+                                totalVillagers: ColoredValue<Int>,
+    ): BaseComponent {
+        val villagersTextComponent = if (totalVillagers.value > 0) {
+            "      ${totalVillagers.value} ${PluralRuForms.VILLAGER.forValue(totalVillagers.value)}".color(totalVillagers.color)
         } else {
             null
         }
 
-        return "Ping: ".color(GRAY) +
-                pingMs.color(pingColor) +
-                "ms           ".color(GRAY) +
-                "%.1f".format(Locale.US, tpsLastMinute).color(tpsColor) +
-                " TPS (".color(GRAY) + medianTickTimeMs.color(medianTickTimeColor) + "ms/tick)".color(GRAY)
+        return "Ping: ".color(GRAY) + playerPingMs.toColoredText() + "ms           ".color(GRAY) +
+                "%.1f".format(Locale.US, tpsLastMinute.value).color(tpsLastMinute.color) + " TPS @ ".color(GRAY) +
+                medianTickTimeMs.toColoredText() + "ms".color(GRAY)
                         .appendNonNull(villagersTextComponent)
     }
 
@@ -171,6 +152,54 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
     }
 
     private val prevLocationByPlayerUUID = mutableMapOf<UUID, Location>()
+
+    private data class ColoredValue<T : Any>(val value: T, val color: ChatColor) {
+        fun toColoredText() = value.color(color)
+    }
+
+    private fun playerPingMs(player: Player): ColoredValue<Int> {
+        val pingMs = player.spigot().ping
+        val color = when (pingMs) {
+            in 0..49 -> GRAY
+            in 50..399 -> GOLD
+            else -> RED
+        }
+        return ColoredValue(pingMs, color)
+    }
+
+    private fun tpsLastMinute(): ColoredValue<Double> {
+        val tpsLastMinute = Bukkit.getTPS()[0]
+        val color = when {
+            tpsLastMinute >= 18.0 -> GRAY
+            tpsLastMinute >= 13.0 -> GOLD
+            else -> RED
+        }
+        return ColoredValue(tpsLastMinute, color)
+    }
+
+    private fun medianTickTimeMs(): ColoredValue<Int> {
+        val medianTickTimeMs = Bukkit.getTickTimes().sortedArray().let { it[it.size / 2] } / 1_000_000
+        val color = when {
+            medianTickTimeMs >= 75 -> RED
+            medianTickTimeMs >= 45 -> GOLD
+            else -> GRAY
+        }
+        return ColoredValue(medianTickTimeMs.toInt(), color)
+    }
+
+    private fun totalVillagers(): ColoredValue<Int> {
+        val totalVillagers = SERVER.worlds
+            .asSequence()
+            .map { it.getEntitiesByClass(Villager::class.java).size }
+            .sum()
+
+        val color = when (totalVillagers) {
+            in 0..39 -> GRAY
+            in 40..79 -> GOLD
+            else -> RED
+        }
+        return ColoredValue(totalVillagers, color)
+    }
 
     private companion object {
         const val TICKS_PER_UPDATE: Long = 10
