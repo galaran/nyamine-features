@@ -7,10 +7,13 @@ import me.galaran.nyamine.util.color
 import me.galaran.nyamine.util.plus
 import net.md_5.bungee.api.ChatColor.RED
 import net.md_5.bungee.api.ChatColor.YELLOW
+import org.bukkit.block.ShulkerBox
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.inventory.meta.BlockStateMeta
+import java.util.logging.Level
 
 class DeathLocation(private val plugin: NyaMineFeatures) : Listener {
 
@@ -23,10 +26,29 @@ class DeathLocation(private val plugin: NyaMineFeatures) : Listener {
                 " at ".color(YELLOW) + deathLoc.world.name.color(RED)
 
         event.entity.sendMessage(message)
-        LOGGER.info("Player ${event.entity.name} died. " + message.toPlainText())
+        LOGGER.info("Player ${event.entity.name} died. " + message.toPlainText() + ". Drop:")
+        try {
+            logDrop(event)
+        } catch (ex: Exception) {
+            LOGGER.log(Level.WARNING, "Error logging drop", ex)
+        }
 
 
         plugin.playerStorage[event.entity].lastDeathPoint =
                 if (deathLoc.y >= 0) Position(deathLoc.x, deathLoc.y, deathLoc.z) else null  // Do not save when fall down to void
+    }
+
+    private fun logDrop(event: PlayerDeathEvent) {
+        for (stack in event.drops) {
+            if (stack.itemMeta is BlockStateMeta && (stack.itemMeta as BlockStateMeta).blockState is ShulkerBox) {
+                val shulker = (stack.itemMeta as BlockStateMeta).blockState as ShulkerBox
+                LOGGER.info(stack.type.name)
+                shulker.inventory.contents.filterNotNull().forEach { stackInShulker ->
+                    LOGGER.info("    $stackInShulker")
+                }
+            } else {
+                LOGGER.info("$stack")
+            }
+        }
     }
 }

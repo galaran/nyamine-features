@@ -103,7 +103,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
             if (deathPoint != null) {
                 val distanceToDeathPoint = loc.toVector().distance(Vector(deathPoint.x, deathPoint.y, deathPoint.z))
                 if (distanceToDeathPoint > REMOVE_DEATH_POINT_WITHIN_DISTANCE) {
-                    addExtra("    Last death: ".color(RED))
+                    addExtra("   Death: ".color(RED))
                     addExtra(deathPoint.x.roundToInt().toString())
                     addExtra(" ")
                     addExtra(deathPoint.y.roundToInt().toString())
@@ -207,7 +207,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
         val TITLE = "NyaMine ^_^".color(GRAY)
-        val LINE = "==============================================".color(GRAY)
+        val LINE = "==================================================".color(GRAY)
         val LF = TextComponent("\n")
     }
 }
