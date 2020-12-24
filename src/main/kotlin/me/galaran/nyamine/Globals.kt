@@ -34,7 +34,7 @@ object OfflinePlayerRegistry : Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         if (event.player.name !in playerUuidByLastName) {
             playerUuidByLastName[event.player.name] = event.player.uniqueId
-            LOGGER.info("New player: event.player.name | event.player.uniqueId")
+            LOGGER.info("New player: ${event.player.name} | ${event.player.uniqueId}")
         }
     }
 }
