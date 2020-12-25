@@ -2,11 +2,11 @@ package me.galaran.nyamine.feature
 
 import io.prometheus.client.Gauge
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.modules.serializersModuleOf
 import me.galaran.nyamine.ConfigReloadListener
 import me.galaran.nyamine.LOGGER
-import me.galaran.nyamine.util.ByPlayerFileStorage
-import me.galaran.nyamine.util.PlayerDataBase
+import me.galaran.nyamine.PLUGIN
+import me.galaran.nyamine.storage.BasePlayerData
+import me.galaran.nyamine.storage.PlayerStorageSingleFile
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.event.EventHandler
@@ -38,11 +38,10 @@ class PrometheusStats : Listener, ConfigReloadListener {
         }
     }
 
-    private val storage = ByPlayerFileStorage(
-            "PrometheusStatsDb.json",
-            serializersModuleOf(PlayerStats.serializer()),
-            PlayerStats.serializer(),
-            ::PlayerStats
+    private val storage = PlayerStorageSingleFile(
+        PLUGIN.dataFolder.toPath().resolve("PrometheusStatsDb.json"),
+        ::PlayerStats,
+        PlayerStats.serializer()
     )
 
     init {
@@ -52,7 +51,7 @@ class PrometheusStats : Listener, ConfigReloadListener {
     fun saveDb() = storage.save()
 
     @Serializable
-    private class PlayerStats : PlayerDataBase() {
+    private class PlayerStats : BasePlayerData() {
         var blocksMined: MutableMap<String, Int> = ConcurrentHashMap()
     }
 

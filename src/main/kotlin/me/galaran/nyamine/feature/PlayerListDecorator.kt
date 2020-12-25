@@ -1,8 +1,8 @@
 package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
-import me.galaran.nyamine.Position
 import me.galaran.nyamine.SERVER
+import me.galaran.nyamine.storage.data.WorldType
 import me.galaran.nyamine.util.appendNonNull
 import me.galaran.nyamine.util.color
 import me.galaran.nyamine.util.plus
@@ -29,6 +29,7 @@ import org.bukkit.util.Vector
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
+import me.galaran.nyamine.storage.data.Location as NyaLocation
 
 class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
 
@@ -86,6 +87,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
 
     private fun speedLocationAndDeathPoint(player: Player): BaseComponent {
         val loc = player.location
+        val playerData = plugin.playerStorage[player]
 
         return TextComponent().apply {
             calcSpeedBlocksPerSecond(player).let {
@@ -99,21 +101,22 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
             addExtra(" : ".color(GRAY))
             addExtra(loc.blockZ.toString())
 
-            val deathPoint: Position? = plugin.playerStorage[player].lastDeathPoint
+            val deathPoint: NyaLocation? = playerData.lastDeathPoint
             if (deathPoint != null) {
+                val worldMatch = loc.world.name == deathPoint.worldName
                 val distanceToDeathPoint = loc.toVector().distance(Vector(deathPoint.x, deathPoint.y, deathPoint.z))
-                if (distanceToDeathPoint > REMOVE_DEATH_POINT_WITHIN_DISTANCE) {
-                    addExtra("   Death: ".color(RED))
-                    addExtra(deathPoint.x.roundToInt().toString())
-                    addExtra(" ")
-                    addExtra(deathPoint.y.roundToInt().toString())
-                    addExtra(" ")
-                    addExtra(deathPoint.z.roundToInt().toString())
-                    addExtra("  ~  ".color(RED))
-                    addExtra(distanceToDeathPoint.roundToInt().toString())
-                    addExtra("m".color(RED))
-                } else if (!player.isDead) {
-                    plugin.playerStorage[player].lastDeathPoint = null
+
+                if (worldMatch && distanceToDeathPoint <= REMOVE_DEATH_POINT_WITHIN_DISTANCE && !player.isDead) {
+                    playerData.lastDeathPoint = null
+                } else {
+                    addExtra("   Death: ".color(DARK_RED))
+
+                    val coords = "${deathPoint.x.roundToInt()} ${deathPoint.y.roundToInt()} ${deathPoint.z.roundToInt()}"
+                    addExtra(coords.color(colorByEnvironment[WorldType.toBukkitType(deathPoint.worldType)]!!))
+
+                    if (worldMatch) {
+                        addExtra("  ~  ${distanceToDeathPoint.roundToInt()}m".color(DARK_RED))
+                    }
                 }
             }
         }

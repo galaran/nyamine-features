@@ -2,7 +2,7 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.LOGGER
 import me.galaran.nyamine.NyaMineFeatures
-import me.galaran.nyamine.Position
+import me.galaran.nyamine.storage.data.Location
 import me.galaran.nyamine.util.color
 import me.galaran.nyamine.util.plus
 import net.md_5.bungee.api.ChatColor.RED
@@ -35,7 +35,7 @@ class DeathLocation(private val plugin: NyaMineFeatures) : Listener {
 
 
         plugin.playerStorage[event.entity].lastDeathPoint =
-                if (deathLoc.y >= 0) Position(deathLoc.x, deathLoc.y, deathLoc.z) else null  // Do not save when fall down to void
+                if (deathLoc.y >= 0) Location(deathLoc) else null  // Do not save when fall down to void
     }
 
     private fun logDrop(event: PlayerDeathEvent) {
