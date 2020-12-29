@@ -55,7 +55,8 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(prometheusStats, this)
         configListeners += prometheusStats
 
-        server.pluginManager.registerEvents(DeathLocation(this), this)
+        server.pluginManager.registerEvents(PlayerDeathLocation(this), this)
+        server.pluginManager.registerEvents(PlayerDropTracker(), this)
         server.pluginManager.registerEvents(PlayerListDecorator(this), this)
 
         val minecartSpeed = MinecartSpeed()
