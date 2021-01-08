@@ -1,7 +1,6 @@
 package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
-import me.galaran.nyamine.Recipes
 import me.galaran.nyamine.ReturnChorusGrade
 import net.ess3.api.IEssentials
 import org.bukkit.Effect
@@ -13,7 +12,6 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -69,14 +67,6 @@ class ReturnChorus(
             effLevel >= ReturnChorusGrade.FAST.enchantLevel -> ReturnChorusGrade.FAST.returnDelayTicks
             effLevel >= ReturnChorusGrade.COMMON.enchantLevel -> ReturnChorusGrade.COMMON.returnDelayTicks
             else -> null
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        event.player.discoverRecipes(listOf(Recipes.RETURN_CHORUS_COMMON, Recipes.RETURN_CHORUS_FAST))
-        if (event.player.isOp) {
-            event.player.discoverRecipe(Recipes.RETURN_CHORUS_INSTANT)
         }
     }
 }

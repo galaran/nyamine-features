@@ -30,7 +30,6 @@ class NyaMineFeatures : JavaPlugin() {
 
     private lateinit var essentials: IEssentials
 
-    private lateinit var returnChorus: ReturnChorus
     private lateinit var prometheusStats: PrometheusStats
 
     private lateinit var commandDispatcher: NyaCommandDispatcher
@@ -48,9 +47,10 @@ class NyaMineFeatures : JavaPlugin() {
         playerStorage = PlayerStorageDirectory(dataFolder.toPath().resolve("players"))
         convertLegacyStorage()
 
-        returnChorus = ReturnChorus(this, essentials)
-        Recipes.registerAll()
-        server.pluginManager.registerEvents(returnChorus, this)
+        CustomItems.Recipies.registerAll()
+        server.pluginManager.registerEvents(CustomItems.Recipies.Discoverer(), this)
+
+        server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
         prometheusStats = PrometheusStats()
         server.pluginManager.registerEvents(prometheusStats, this)
         configListeners += prometheusStats
@@ -58,6 +58,7 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(PlayerDeathLocation(this), this)
         server.pluginManager.registerEvents(PlayerDropTracker(), this)
         server.pluginManager.registerEvents(PlayerListDecorator(this), this)
+        server.pluginManager.registerEvents(TransparentItemFrame(), this)
 
         val minecartSpeed = MinecartSpeed()
         server.pluginManager.registerEvents(minecartSpeed, this)

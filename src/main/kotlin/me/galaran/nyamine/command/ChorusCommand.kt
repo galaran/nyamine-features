@@ -1,6 +1,6 @@
 package me.galaran.nyamine.command
 
-import me.galaran.nyamine.Recipes
+import me.galaran.nyamine.CustomItems
 import me.galaran.nyamine.ReturnChorusGrade
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -17,7 +17,7 @@ object ChorusCommand : NyaCommand {
 
         val grade = ReturnChorusGrade.values().find { it.enchantLevel.toString() == args[0] }
         return if (grade != null) {
-            sender.world.dropItem(sender.eyeLocation, Recipes.createReturnChorusItem(grade))
+            sender.world.dropItem(sender.eyeLocation, CustomItems.createReturnChorusItem(grade))
             sender.sendMessage("${grade.nameColor}Ням!")
             true
         } else {
