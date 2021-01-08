@@ -45,17 +45,6 @@ class PlayerDropTracker : Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    fun onEntityPickupItem(event: EntityPickupItemEvent) {
-        val stack = event.item.itemStack
-        if (stack.type in TRACKED_ITEMS && event.item.uniqueId !in ignoredItemsIds.asMap().keys) {
-            val loc = event.item.location
-            val who = if (event.entityType == EntityType.PLAYER) "Player ${event.entity.name}" else event.entityType.name
-            LOGGER.info("$who picked up ${stack.toFormattedString()} at " +
-                    "${loc.blockX}, ${loc.blockY}, ${loc.blockZ} in ${loc.world.name}")
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onItemDespawnEvent(event: ItemDespawnEvent) {
         val stack = event.entity.itemStack
         if (stack.type in TRACKED_ITEMS) {
@@ -65,8 +54,8 @@ class PlayerDropTracker : Listener {
         }
     }
 
-    // Do not log, when player breaks and picks up block (prevents shulker box spam)
-    private val ignoredItemsIds: Cache<UUID, Unit> = CacheBuilder.newBuilder()
+    // Do not log, when player breaks and picks up block immediately (prevents shulker box spam)
+    private val ignoredItemEntitiesIdsOnPickup: Cache<UUID, Unit> = CacheBuilder.newBuilder()
         .concurrencyLevel(1)
         .expireAfterWrite(10, TimeUnit.MINUTES)
         .build()
@@ -74,9 +63,21 @@ class PlayerDropTracker : Listener {
     @Suppress("RedundantUnitExpression")
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onBlockDropItemEvent(event: BlockDropItemEvent) {
-        ignoredItemsIds.putAll(
+        ignoredItemEntitiesIdsOnPickup.putAll(
             event.items.map(Item::getUniqueId).associateWith { Unit }
         )
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onEntityPickupItem(event: EntityPickupItemEvent) {
+        val stack = event.item.itemStack
+        val isIgnored = ignoredItemEntitiesIdsOnPickup.asMap().remove(event.item.uniqueId, Unit)
+        if (!isIgnored && stack.type in TRACKED_ITEMS) {
+            val loc = event.item.location
+            val who = if (event.entityType == EntityType.PLAYER) "Player ${event.entity.name}" else event.entityType.name
+            LOGGER.info("$who picked up ${stack.toFormattedString()} at " +
+                    "${loc.blockX}, ${loc.blockY}, ${loc.blockZ} in ${loc.world.name}")
+        }
     }
 
     private companion object {
