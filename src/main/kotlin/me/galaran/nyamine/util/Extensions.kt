@@ -4,6 +4,7 @@ import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -24,3 +25,5 @@ fun BaseComponent.appendNonNull(other: BaseComponent?): BaseComponent {
     return if (other != null) this.apply { addExtra(other) } else this
 }
 operator fun BaseComponent.plus(other: BaseComponent): BaseComponent = appendNonNull(other)
+
+val Player.isVanished: Boolean get() = this.getMetadata("vanished").any { it.asBoolean() }

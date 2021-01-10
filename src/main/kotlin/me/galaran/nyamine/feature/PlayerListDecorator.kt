@@ -3,17 +3,16 @@ package me.galaran.nyamine.feature
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.SERVER
 import me.galaran.nyamine.storage.data.WorldType
-import me.galaran.nyamine.util.appendNonNull
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
-import me.galaran.nyamine.util.stripColorCodes
+import me.galaran.nyamine.util.*
 import me.galaran.nyamine.util.text.PluralRuForms
+import me.galaran.nyamine.util.text.Symbols
 import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
 import net.ess3.api.events.AfkStatusChangeEvent
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatColor.*
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
+import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Statistic
@@ -26,23 +25,30 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.util.Vector
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import me.galaran.nyamine.storage.data.Location as NyaLocation
 
-class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
+class PlayerListDecorator(
+    private val plugin: NyaMineFeatures,
+    private val vaultEconomy: Economy
+) : Listener {
 
     init {
         plugin.server.scheduler.runTaskTimer(plugin, Runnable {
-            // Server metrics
+            // Server-wide values
             val tpsLastMinute = tpsLastMinute()
             val medianTickTimeMs = medianTickTimeMs()
             val totalVillagers = totalVillagers()
+            val playersOnline = playersOnline()
 
             Bukkit.getOnlinePlayers().forEach {
                 it.setPlayerListHeaderFooter(arrayOf(
-                        TITLE, LF,
+                        titleAndPlayersOnline(playersOnline), LF,
                         LINE, LF
                 ), arrayOf(
                         LF,
@@ -51,7 +57,7 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         speedLocationAndDeathPoint(it), LF,
                         LF,
                         performanceInfo(playerPingMs(it), tpsLastMinute, medianTickTimeMs, totalVillagers), LF,
-                        timePlayed(it), LF,
+                        balanceAndTimePlayed(it), LF,
                         LINE,
                 ))
             }
@@ -77,6 +83,10 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
             player.setPlayerListName(colorByEnvironment[player.world.environment].toString() + player.playerListName.stripColorCodes())
         }, 1)
+    }
+
+    private fun titleAndPlayersOnline(playersOnline: Int): BaseComponent {
+        return "                     NyaMine ^_^          Онлайн: $playersOnline".color(GRAY)
     }
 
     private val colorByEnvironment = mapOf(
@@ -139,9 +149,12 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
                         .appendNonNull(villagersTextComponent)
     }
 
-    private fun timePlayed(player: Player): BaseComponent {
+    private fun balanceAndTimePlayed(player: Player): BaseComponent {
+        val balanceLong = vaultEconomy.getBalance(player).roundToLong()
         val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-        return ("Наиграно " + TicksToPlayedTextConverter.convert(ticksPlayed)).color(GRAY)
+
+        return "${BALANCE_FORMATTER.format(balanceLong)} ${Symbols.NYA_CURRENCY}          ".color(GRAY) +
+                "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}".color(GRAY)
     }
 
     private fun calcSpeedBlocksPerSecond(player: Player): Double {
@@ -204,13 +217,16 @@ class PlayerListDecorator(private val plugin: NyaMineFeatures) : Listener {
         return ColoredValue(totalVillagers, color)
     }
 
+    private fun playersOnline(): Int = SERVER.onlinePlayers.count { !it.isVanished }
+
     private companion object {
         const val TICKS_PER_UPDATE: Long = 10
 
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
-        val TITLE = "NyaMine ^_^".color(GRAY)
         val LINE = "==================================================".color(GRAY)
         val LF = TextComponent("\n")
+
+        val BALANCE_FORMATTER = DecimalFormat("###,###", DecimalFormatSymbols.getInstance(Locale.US).apply { groupingSeparator = ' ' })
     }
 }

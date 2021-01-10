@@ -4,7 +4,7 @@ description: Sweet features for NyaMine
 authors: [Galaran]
 
 api-version: "1.13"
-depend: [Kotlin, Essentials, PrometheusExporter]
+depend: [Kotlin, Essentials, Vault, PrometheusExporter]
 main: me.galaran.nyamine.NyaMineFeatures
 
 commands:
