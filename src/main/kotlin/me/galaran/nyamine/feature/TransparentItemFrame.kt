@@ -17,20 +17,24 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.hanging.HangingBreakEvent
 import org.bukkit.event.hanging.HangingPlaceEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
 class TransparentItemFrame : Listener {
 
     private companion object {
-        val TRANSPARENT_ITEM_FRAME_KEY = NamespacedKey(PLUGIN, "transparent")
-        const val TRANSPARENT_ITEM_FRAME_VALUE: Byte = 1
+        val STACK_OF_ONE: ItemStack = CustomItems.createTransparentItemFrame()
+
+        val ENTITY_ATTRIBUTE_KEY = NamespacedKey(PLUGIN, "transparent")
+        const val ENTITY_ATTRIBUTE_VALUE: Byte = 1
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onHangingPlace(event: HangingPlaceEvent) {
-        val stackInMainHand = event.player?.inventory?.itemInMainHand
-        if (stackInMainHand == CustomItems.createTransparentItemFrame()) {
-            event.entity.persistentDataContainer.set(TRANSPARENT_ITEM_FRAME_KEY, PersistentDataType.BYTE, TRANSPARENT_ITEM_FRAME_VALUE)
+        val stackInMainHand: ItemStack? = event.player?.inventory?.itemInMainHand
+        if (STACK_OF_ONE.isSimilar(stackInMainHand)) {
+            event.entity.persistentDataContainer.set(ENTITY_ATTRIBUTE_KEY, PersistentDataType.BYTE, ENTITY_ATTRIBUTE_VALUE)
+            updateVisibilityAndGlowing(event.entity as ItemFrame)
         }
     }
 
@@ -49,7 +53,7 @@ class TransparentItemFrame : Listener {
     fun onPlayerInteractEntity(event: PlayerInteractEntityEvent) {
         if (event.rightClicked.isTransparentItemFrame()) {
             SERVER.scheduler.runTaskLater(PLUGIN, Runnable {
-                updateVisibility(event.rightClicked as ItemFrame)
+                updateVisibilityAndGlowing(event.rightClicked as ItemFrame)
             }, 1)
         }
     }
@@ -59,23 +63,29 @@ class TransparentItemFrame : Listener {
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         if (event.entity.isTransparentItemFrame()) {
             SERVER.scheduler.runTaskLater(PLUGIN, Runnable {
-                updateVisibility(event.entity as ItemFrame)
+                updateVisibilityAndGlowing(event.entity as ItemFrame)
             }, 1)
         }
     }
 
-    private fun updateVisibility(itemFrame: ItemFrame) {
+    private fun updateVisibilityAndGlowing(itemFrame: ItemFrame) {
         if (itemFrame.item.type.isAir) {
             if (!itemFrame.isVisible) {
                 itemFrame.isVisible = true
+            }
+            if (!itemFrame.isGlowing) {
+                itemFrame.isGlowing = true
             }
         } else {
             if (itemFrame.isVisible) {
                 itemFrame.isVisible = false
             }
+            if (itemFrame.isGlowing) {
+                itemFrame.isGlowing = false
+            }
         }
     }
 
     private fun Entity.isTransparentItemFrame() =
-        this.type == EntityType.ITEM_FRAME && this.persistentDataContainer.has(TRANSPARENT_ITEM_FRAME_KEY, PersistentDataType.BYTE)
+        this.type == EntityType.ITEM_FRAME && this.persistentDataContainer.has(ENTITY_ATTRIBUTE_KEY, PersistentDataType.BYTE)
 }

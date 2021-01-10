@@ -1,7 +1,7 @@
 package me.galaran.nyamine
 
 import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.stack
+import me.galaran.nyamine.util.stackOfOne
 import me.galaran.nyamine.util.updateMeta
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
@@ -19,7 +19,7 @@ import org.bukkit.inventory.ShapelessRecipe
 object CustomItems {
 
     fun createReturnChorusItem(grade: ReturnChorusGrade): ItemStack {
-        return Material.CHORUS_FRUIT.stack().updateMeta { meta ->
+        return Material.CHORUS_FRUIT.stackOfOne().updateMeta { meta ->
             meta.setDisplayName(grade.nameColor.toString() + grade.displayName)
             grade.lore?.let {
                 meta.lore = listOf(it)
@@ -29,7 +29,7 @@ object CustomItems {
     }
 
     fun createTransparentItemFrame(): ItemStack {
-        return Material.ITEM_FRAME.stack().updateMeta {
+        return Material.ITEM_FRAME.stackOfOne().updateMeta {
             it.setDisplayNameComponent(Array(1, { "Невидимая рамка".color(ChatColor.AQUA) }))
         }
     }
@@ -48,23 +48,23 @@ object CustomItems {
         private fun returnChorusCommon(): ShapedRecipe {
             return ShapedRecipe(RETURN_CHORUS_COMMON, createReturnChorusItem(ReturnChorusGrade.COMMON))
                 .shape("RRR", "RCR", "RRR")
-                .setIngredient('R', Material.REDSTONE.stack())
-                .setIngredient('C', Material.CHORUS_FRUIT.stack())
+                .setIngredient('R', Material.REDSTONE.stackOfOne())
+                .setIngredient('C', Material.CHORUS_FRUIT.stackOfOne())
         }
 
         private fun returnChorusFast(): ShapedRecipe {
             return ShapedRecipe(RETURN_CHORUS_FAST, createReturnChorusItem(ReturnChorusGrade.FAST))
                 .shape("GMG", "BCB", "GMG")
-                .setIngredient('G', Material.GLOWSTONE_DUST.stack())
-                .setIngredient('M', Material.PHANTOM_MEMBRANE.stack())
-                .setIngredient('B', Material.BLAZE_POWDER.stack())
+                .setIngredient('G', Material.GLOWSTONE_DUST.stackOfOne())
+                .setIngredient('M', Material.PHANTOM_MEMBRANE.stackOfOne())
+                .setIngredient('B', Material.BLAZE_POWDER.stackOfOne())
                 .setIngredient('C', createReturnChorusItem(ReturnChorusGrade.COMMON))
         }
 
         private fun transparentItemFrame(): ShapelessRecipe {
             return ShapelessRecipe(TRANSPARENT_ITEM_FRAME, createTransparentItemFrame())
-                .addIngredient(Material.ITEM_FRAME.stack())
-                .addIngredient(Material.GLASS_PANE.stack())
+                .addIngredient(Material.ITEM_FRAME.stackOfOne())
+                .addIngredient(Material.GLASS_PANE.stackOfOne())
         }
 
         class Discoverer : Listener {
