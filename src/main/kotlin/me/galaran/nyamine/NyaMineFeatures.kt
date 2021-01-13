@@ -1,10 +1,7 @@
 package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
-import me.galaran.nyamine.command.AdminCommand
-import me.galaran.nyamine.command.ChorusCommand
-import me.galaran.nyamine.command.NyaCommandDispatcher
-import me.galaran.nyamine.command.PlayerInfoCommand
+import me.galaran.nyamine.command.*
 import me.galaran.nyamine.feature.*
 import me.galaran.nyamine.storage.PlayerStorageDirectory
 import net.ess3.api.IEssentials
@@ -43,6 +40,7 @@ class NyaMineFeatures : JavaPlugin() {
         server.pluginManager.registerEvents(CustomItems.Recipies.Discoverer(), this)
 
         server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
+        server.pluginManager.registerEvents(InfinitySpawnEgg(), this)
         prometheusStats = PrometheusStats()
         server.pluginManager.registerEvents(prometheusStats, this)
         configListeners += prometheusStats
@@ -59,8 +57,9 @@ class NyaMineFeatures : JavaPlugin() {
         reloadConf()
 
         commandDispatcher = NyaCommandDispatcher().apply {
-            registerHandler(AdminCommand)
+            registerHandler(NyaAdminCommand)
             registerHandler(ChorusCommand)
+            registerHandler(InfinitySpawnEggCommand)
             registerHandler(PlayerInfoCommand)
         }
 

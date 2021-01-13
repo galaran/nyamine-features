@@ -1,5 +1,6 @@
 package me.galaran.nyamine
 
+import me.galaran.nyamine.util.ItemUtils
 import me.galaran.nyamine.util.color
 import me.galaran.nyamine.util.stackOfOne
 import me.galaran.nyamine.util.updateMeta
@@ -31,6 +32,17 @@ object CustomItems {
     fun createTransparentItemFrame(): ItemStack {
         return Material.ITEM_FRAME.stackOfOne().updateMeta {
             it.setDisplayNameComponent(Array(1, { "Невидимая рамка".color(ChatColor.AQUA) }))
+        }
+    }
+
+    fun createInfinitySpawnEgg(eggType: Material): ItemStack {
+        require(eggType in ItemUtils.ALL_SPAWN_EGGS)
+
+        return eggType.stackOfOne().updateMeta { meta ->
+            meta.loreComponents = listOf(Array(1, {
+                "Может быть использовано только на спавнере (при этом расходуется)".color(ChatColor.GREEN)
+            }))
+            meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true)
         }
     }
 

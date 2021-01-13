@@ -3,6 +3,7 @@ package me.galaran.nyamine.feature
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import me.galaran.nyamine.LOGGER
+import me.galaran.nyamine.util.ItemUtils
 import org.bukkit.Material
 import org.bukkit.Material.*
 import org.bukkit.block.ShulkerBox
@@ -95,7 +96,7 @@ class PlayerDropTracker : Listener {
             TRIDENT,
             ENCHANTED_GOLDEN_APPLE,
             CONDUIT, HEART_OF_THE_SEA,
-            *Material.values().filter { it.name.endsWith("_SPAWN_EGG") }.toTypedArray(),
+            *ItemUtils.ALL_SPAWN_EGGS.toTypedArray(),
             SHULKER_SHELL,
             *Material.values().filter { it.name.endsWith("SHULKER_BOX") && !it.name.contains("LEGACY") }.toTypedArray(),
             BEDROCK,

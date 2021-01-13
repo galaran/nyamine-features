@@ -3,7 +3,7 @@ package me.galaran.nyamine.command
 import me.galaran.nyamine.PLUGIN
 import org.bukkit.command.CommandSender
 
-object AdminCommand : NyaCommand {
+object NyaAdminCommand : NyaCommand {
 
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
         if (args.size == 1 && args.first() == "reload") {

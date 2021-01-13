@@ -16,6 +16,10 @@ commands:
     description: Gives you return chorus
     permission: nyamine.chorus
     permission-message: You do not have permission
+  infinityspawnegg:
+    description: Gives you infinity spawn egg, placeable to spawner
+    permission: nyamine.infinityspawnegg
+    permission-message: You do not have permission
   playerinfo:
     description: Some player info
     permission: nyamine.playerinfo
@@ -24,7 +28,9 @@ commands:
 permissions:
   nyamine.admin:
     default: op
-  nyaminechorus:
+  nyamine.chorus:
+    default: op
+  nyamine.infinityspawnegg:
     default: op
   nyamine.playerinfo:
     default: op
