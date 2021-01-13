@@ -1,5 +1,6 @@
 package me.galaran.nyamine.feature
 
+import me.galaran.nyamine.LOGGER
 import me.galaran.nyamine.command.InfinitySpawnEggCommand
 import me.galaran.nyamine.util.ItemUtils
 import me.galaran.nyamine.util.color
@@ -31,7 +32,12 @@ class InfinitySpawnEgg : Listener {
         val clickedBlockType: Material? = event.clickedBlock?.type
 
         if (Enchantment.ARROW_INFINITE in usedItem.enchantments.keys) {
-            if (clickedBlockType != Material.SPAWNER) {
+            if (clickedBlockType == Material.SPAWNER) {
+                with(event.clickedBlock!!.location) {
+                    LOGGER.info("${event.player.name} used infinity spawn egg ${usedItem.type.key}"
+                            + " to spawner in ${world?.name} at $blockX $blockY $blockZ")
+                }
+            } else {
                 event.player.sendMessage("Это яйцо может быть использовано только на спавнере!".color(RED))
                 event.isCancelled = true
             }
