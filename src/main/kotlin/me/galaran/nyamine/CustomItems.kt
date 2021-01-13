@@ -1,10 +1,9 @@
 package me.galaran.nyamine
 
-import me.galaran.nyamine.util.ItemUtils
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.stackOfOne
-import me.galaran.nyamine.util.updateMeta
+import me.galaran.nyamine.util.*
 import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.ChatColor.DARK_RED
+import net.md_5.bungee.api.ChatColor.GREEN
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -31,7 +30,7 @@ object CustomItems {
 
     fun createTransparentItemFrame(): ItemStack {
         return Material.ITEM_FRAME.stackOfOne().updateMeta {
-            it.setDisplayNameComponent(Array(1, { "Невидимая рамка".color(ChatColor.AQUA) }))
+            it.setDisplayNameComponent(arrayOf("Невидимая рамка".color(ChatColor.AQUA)))
         }
     }
 
@@ -39,9 +38,10 @@ object CustomItems {
         require(eggType in ItemUtils.ALL_SPAWN_EGGS)
 
         return eggType.stackOfOne().updateMeta { meta ->
-            meta.loreComponents = listOf(Array(1, {
-                "Может быть использовано только на спавнере (при этом расходуется)".color(ChatColor.GREEN)
-            }))
+            meta.loreComponents = listOf(
+                arrayOf("Может быть использовано только".color(GREEN)),
+                arrayOf("на спавнере ".color(GREEN) + "(при этом расходуется)".color(DARK_RED))
+            )
             meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true)
         }
     }
