@@ -26,6 +26,7 @@ commands:
     permission-message: You do not have permission
 
 permissions:
+  # Command permissions
   nyamine.admin:
     default: op
   nyamine.chorus:
@@ -34,3 +35,7 @@ permissions:
     default: op
   nyamine.playerinfo:
     default: op
+
+  # Passive abilities
+  nyamine.breakspawners:
+    defaut: op

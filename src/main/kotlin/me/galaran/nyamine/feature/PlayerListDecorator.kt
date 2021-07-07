@@ -153,8 +153,12 @@ class PlayerListDecorator(
         val balanceLong = vaultEconomy.getBalance(player).roundToLong()
         val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
 
-        return "${BALANCE_FORMATTER.format(balanceLong)} ${Symbols.NYA_CURRENCY}          ".color(GRAY) +
-                "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}".color(GRAY)
+        val playedText = "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}".color(GRAY)
+        return if (balanceLong == 0L) {
+            playedText
+        } else {
+            "${BALANCE_FORMATTER.format(balanceLong)} ${Symbols.NYA_CURRENCY}          ".color(GRAY) + playedText
+        }
     }
 
     private fun calcSpeedBlocksPerSecond(player: Player): Double {

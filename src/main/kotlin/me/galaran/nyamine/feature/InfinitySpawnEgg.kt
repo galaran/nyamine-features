@@ -1,12 +1,12 @@
 package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.LOGGER
+import me.galaran.nyamine.Permissions
 import me.galaran.nyamine.command.InfinitySpawnEggCommand
 import me.galaran.nyamine.util.ItemUtils
 import me.galaran.nyamine.util.color
 import me.galaran.nyamine.util.plus
 import net.md_5.bungee.api.ChatColor.*
-import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.enchantments.Enchantment
@@ -55,7 +55,7 @@ class InfinitySpawnEgg : Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onBlockBreakEvent(event: BlockBreakEvent) {
-        if (event.block.type == Material.SPAWNER && event.player.gameMode != GameMode.CREATIVE) {
+        if (event.block.type == Material.SPAWNER && !event.player.hasPermission(Permissions.BREAK_SPAWNERS)) {
             event.player.sendMessage("Nope".color(RED))
             event.isCancelled = true
         }
