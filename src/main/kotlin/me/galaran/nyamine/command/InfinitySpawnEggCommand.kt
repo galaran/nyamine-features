@@ -1,12 +1,10 @@
 package me.galaran.nyamine.command
 
 import me.galaran.nyamine.CustomItems
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
 import me.galaran.nyamine.util.ItemUtils
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
-import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.ChatColor.DARK_RED
-import net.md_5.bungee.api.ChatColor.GREEN
+import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -23,10 +21,11 @@ object InfinitySpawnEggCommand : NyaCommand {
 
         val eggType: Material? = ItemUtils.ALL_SPAWN_EGGS.find { it.key.key == args[0] || it.key.toString() == args[0] }
         if (eggType == null) {
-            sender.sendMessage("Unknown spawn egg type: ".color(DARK_RED) + args[0].color(ChatColor.RED))
+            sender.sendMessage("Unknown spawn egg type: ".colored(DARK_RED) + args[0].colored(RED))
         } else {
+            // TODO: Add to inventory, not drop
             sender.world.dropItem(sender.eyeLocation, CustomItems.createInfinitySpawnEgg(eggType))
-            sender.sendMessage("Лови яйцо для спавнера с ${eggType.key}".color(GREEN))
+            sender.sendMessage("Лови яйцо для спавнера с ${eggType.key}" colored GREEN)
         }
 
         return true

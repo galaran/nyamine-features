@@ -3,7 +3,7 @@ package me.galaran.nyamine.feature
 import me.galaran.nyamine.CustomItems
 import me.galaran.nyamine.PLUGIN
 import me.galaran.nyamine.SERVER
-import net.md_5.bungee.api.ChatColor
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Effect
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
@@ -42,7 +42,7 @@ class TransparentItemFrame : Listener {
     fun onHangingBreak(event: HangingBreakEvent) {
         if (event.entity.isTransparentItemFrame()) {
             with(event.entity.location) {
-                world.playEffect(this, Effect.INSTANT_POTION_BREAK, ChatColor.AQUA.color.rgb)
+                world.playEffect(this, Effect.INSTANT_POTION_BREAK, NamedTextColor.AQUA.value())
                 world.playSound(this, Sound.BLOCK_GLASS_BREAK, 1f, 1f)
             }
         }

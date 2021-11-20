@@ -2,11 +2,11 @@ package me.galaran.nyamine.command
 
 import me.galaran.nyamine.OfflinePlayerRegistry
 import me.galaran.nyamine.SERVER
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
 import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
-import net.md_5.bungee.api.ChatColor.*
-import net.md_5.bungee.api.chat.TextComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.OfflinePlayer
 import org.bukkit.Statistic
 import org.bukkit.command.CommandSender
@@ -26,47 +26,47 @@ object PlayerInfoCommand : NyaCommand {
         val playerName = args[0]
         val uuid = OfflinePlayerRegistry.uuidByLastName(playerName)
         if (uuid == null) {
-            sender.sendMessage("Игрок не найден: ".color(DARK_RED) + playerName.color(RED))
+            sender.sendMessage("Игрок не найден: ".colored(DARK_RED) + playerName.colored(RED))
             return true
         }
 
         val offlinePlayer = SERVER.getOfflinePlayer(uuid)
 
         sender.apply {
-            sendMessage("Игрок ".color(WHITE) + offlinePlayer.name!!.color(if (offlinePlayer.isOp) RED else GREEN))
-            sendMessage("    Регистрация ".color(WHITE) + firstPlayedText(offlinePlayer))
-            sendMessage("    Последний раз на сервере ".color(WHITE) + lastSeenText(offlinePlayer, sender))
-            sendMessage("    Наиграно ".color(WHITE) + totalPlayedText(offlinePlayer, sender))
+            sendMessage("Игрок ".colored(WHITE) + offlinePlayer.name!!.colored(if (offlinePlayer.isOp) RED else GREEN))
+            sendMessage("    Регистрация ".colored(WHITE) + firstPlayedText(offlinePlayer))
+            sendMessage("    Последний раз на сервере ".colored(WHITE) + lastSeenText(offlinePlayer, sender))
+            sendMessage("    Наиграно ".colored(WHITE) + totalPlayedText(offlinePlayer, sender))
         }
         return true
     }
 
-    private fun firstPlayedText(target: OfflinePlayer): TextComponent {
+    private fun firstPlayedText(target: OfflinePlayer): Component {
         val firstPlayedDateTime = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(target.firstPlayed),
                 ZoneId.systemDefault()
         )
-        return firstPlayedDateTime.format(DATE_FORMATTER).color(DARK_PURPLE)
+        return firstPlayedDateTime.format(DATE_FORMATTER) colored DARK_PURPLE
     }
 
-    private fun lastSeenText(target: OfflinePlayer, caller: CommandSender): TextComponent {
+    private fun lastSeenText(target: OfflinePlayer, caller: CommandSender): Component {
         val lastSeenDateTime = LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(target.lastSeen),
                 ZoneId.systemDefault()
         )
         return when {
-            target.isOp && !caller.isOp -> "<скрыто>".color(DARK_RED)
-            target.isOnline -> "Онлайн".color(GREEN)
-            else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK".color(LIGHT_PURPLE)
+            target.isOp && !caller.isOp -> "<скрыто>" colored DARK_RED
+            target.isOnline -> "Онлайн" colored GREEN
+            else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK" colored LIGHT_PURPLE  // FIXME: Server time zone
         }
     }
 
-    private fun totalPlayedText(target: OfflinePlayer, caller: CommandSender): TextComponent {
+    private fun totalPlayedText(target: OfflinePlayer, caller: CommandSender): Component {
         return if (target.isOp && !caller.isOp) {
-            "<скрыто>".color(DARK_RED)
+            "<скрыто>" colored DARK_RED
         } else {
             val ticksPlayed = target.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-            TicksToPlayedTextConverter.convert(ticksPlayed).color(GOLD)
+            TicksToPlayedTextConverter.convert(ticksPlayed) colored GOLD
         }
     }
 

@@ -3,6 +3,7 @@ package me.galaran.nyamine.feature
 import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import me.galaran.nyamine.LOGGER
+import me.galaran.nyamine.extension.toBasicString
 import me.galaran.nyamine.util.ItemUtils
 import org.bukkit.Material
 import org.bukkit.Material.*
@@ -29,7 +30,7 @@ class PlayerDropTracker : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onPlayerDeath(event: PlayerDeathEvent) {
         val message = PlayerDeathLocation.formatDeathLocation(event)
-        LOGGER.info("Player ${event.entity.name} died. " + message.toPlainText() + ". Drop:")
+        LOGGER.info("Player ${event.entity.name} died. " + message.toBasicString() + ". Drop:")
         event.drops.forEach { LOGGER.info(it.toFormattedString()) }
     }
 

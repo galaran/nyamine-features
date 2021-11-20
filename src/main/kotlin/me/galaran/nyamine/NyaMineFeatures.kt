@@ -5,7 +5,6 @@ import me.galaran.nyamine.command.*
 import me.galaran.nyamine.feature.*
 import me.galaran.nyamine.storage.PlayerStorageDirectory
 import net.ess3.api.IEssentials
-import net.milkbowl.vault.economy.Economy
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
@@ -17,7 +16,6 @@ class NyaMineFeatures : JavaPlugin() {
         private set
 
     private lateinit var essentials: IEssentials
-    private lateinit var vaultEconomy: Economy
 
     private lateinit var prometheusStats: PrometheusStats
 
@@ -27,7 +25,6 @@ class NyaMineFeatures : JavaPlugin() {
 
     override fun onEnable() {
         essentials = getPlugin(Essentials::class.java)
-        vaultEconomy = server.servicesManager.getRegistration(Economy::class.java)!!.provider
 
         PLUGIN = this
         SERVER = this.server
@@ -47,7 +44,7 @@ class NyaMineFeatures : JavaPlugin() {
 
         server.pluginManager.registerEvents(PlayerDeathLocation(this), this)
         server.pluginManager.registerEvents(PlayerDropTracker(), this)
-        server.pluginManager.registerEvents(PlayerListDecorator(this, vaultEconomy), this)
+        server.pluginManager.registerEvents(PlayerListDecorator(this), this)
         server.pluginManager.registerEvents(TransparentItemFrame(), this)
 
         val minecartSpeed = MinecartSpeed()

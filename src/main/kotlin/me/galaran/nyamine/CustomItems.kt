@@ -1,9 +1,12 @@
 package me.galaran.nyamine
 
-import me.galaran.nyamine.util.*
-import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.ChatColor.DARK_RED
-import net.md_5.bungee.api.ChatColor.GREEN
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
+import me.galaran.nyamine.extension.stackOfOne
+import me.galaran.nyamine.extension.updateMeta
+import me.galaran.nyamine.util.ItemUtils
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -20,9 +23,9 @@ object CustomItems {
 
     fun createReturnChorusItem(grade: ReturnChorusGrade): ItemStack {
         return Material.CHORUS_FRUIT.stackOfOne().updateMeta { meta ->
-            meta.setDisplayName(grade.nameColor.toString() + grade.displayName)
+            meta.displayName(grade.displayName colored grade.nameColor)
             grade.lore?.let {
-                meta.lore = listOf(it)
+                meta.lore(listOf(Component.text(it)))
             }
             meta.addEnchant(Enchantment.DIG_SPEED, grade.enchantLevel, true)
         }
@@ -30,7 +33,7 @@ object CustomItems {
 
     fun createTransparentItemFrame(): ItemStack {
         return Material.ITEM_FRAME.stackOfOne().updateMeta {
-            it.setDisplayNameComponent(arrayOf("Невидимая рамка".color(ChatColor.AQUA)))
+            it.displayName("Невидимая рамка" colored AQUA)
         }
     }
 
@@ -38,10 +41,10 @@ object CustomItems {
         require(eggType in ItemUtils.ALL_SPAWN_EGGS)
 
         return eggType.stackOfOne().updateMeta { meta ->
-            meta.loreComponents = listOf(
-                arrayOf("Может быть использовано только".color(GREEN)),
-                arrayOf("на спавнере ".color(GREEN) + "(при этом расходуется)".color(DARK_RED))
-            )
+            meta.lore(listOf(
+                "Может быть использовано только" colored GREEN,
+                "на спавнере ".colored(GREEN) + "(при этом расходуется)".colored(DARK_RED)
+            ))
             meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true)
         }
     }

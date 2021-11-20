@@ -1,9 +1,9 @@
 package me.galaran.nyamine.command
 
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
-import net.md_5.bungee.api.ChatColor.DARK_GREEN
-import net.md_5.bungee.api.ChatColor.WHITE
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
+import net.kyori.adventure.text.format.NamedTextColor.DARK_GREEN
+import net.kyori.adventure.text.format.NamedTextColor.WHITE
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 
@@ -20,7 +20,7 @@ class NyaCommandDispatcher {
             return it.execute(sender, args).also { executed ->
                 if (!executed) {
                     val usage = "/${it.commandName} ${it.usageParameters}"
-                    sender.sendMessage("Usage: ".color(WHITE) + usage.color(DARK_GREEN))
+                    sender.sendMessage("Usage: ".colored(WHITE) + usage.colored(DARK_GREEN))
                 }
             }
         }

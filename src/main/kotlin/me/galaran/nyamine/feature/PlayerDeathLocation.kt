@@ -1,12 +1,12 @@
 package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
 import me.galaran.nyamine.storage.data.Location
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
-import net.md_5.bungee.api.ChatColor.RED
-import net.md_5.bungee.api.ChatColor.YELLOW
-import net.md_5.bungee.api.chat.BaseComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor.RED
+import net.kyori.adventure.text.format.NamedTextColor.YELLOW
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -24,10 +24,10 @@ class PlayerDeathLocation(private val plugin: NyaMineFeatures) : Listener {
     }
 
     companion object {
-        fun formatDeathLocation(event: PlayerDeathEvent): BaseComponent {
+        fun formatDeathLocation(event: PlayerDeathEvent): Component {
             with(event.entity.location) {
-                return "Death location: ".color(YELLOW) + "$blockX $blockY $blockZ".color(RED) +
-                        " at ".color(YELLOW) + world.name.color(RED)
+                return "Death location: ".colored(YELLOW) + "$blockX $blockY $blockZ".colored(RED) +
+                        " at ".colored(YELLOW) + world.name.colored(RED)
             }
         }
     }

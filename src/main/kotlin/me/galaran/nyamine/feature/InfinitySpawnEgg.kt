@@ -3,10 +3,10 @@ package me.galaran.nyamine.feature
 import me.galaran.nyamine.LOGGER
 import me.galaran.nyamine.Permissions
 import me.galaran.nyamine.command.InfinitySpawnEggCommand
+import me.galaran.nyamine.extension.colored
+import me.galaran.nyamine.extension.plus
 import me.galaran.nyamine.util.ItemUtils
-import me.galaran.nyamine.util.color
-import me.galaran.nyamine.util.plus
-import net.md_5.bungee.api.ChatColor.*
+import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.enchantments.Enchantment
@@ -38,15 +38,15 @@ class InfinitySpawnEgg : Listener {
                             + " to spawner in ${world?.name} at $blockX $blockY $blockZ")
                 }
             } else {
-                event.player.sendMessage("Это яйцо может быть использовано только на спавнере!".color(RED))
+                event.player.sendMessage("Это яйцо может быть использовано только на спавнере!" colored RED)
                 event.isCancelled = true
             }
         } else {
             if (clickedBlockType == Material.SPAWNER) {
-                event.player.sendMessage("На спавнер могут быть применены только яйца с зачарованием Бесконечность".color(RED))
+                event.player.sendMessage("На спавнер могут быть применены только яйца с зачарованием Бесконечность" colored RED)
                 if (event.player.hasPermission("nyamine.infinityspawnegg")) {
-                    event.player.sendMessage("Можешь создать такое командой ".color(GREEN) +
-                            "/${InfinitySpawnEggCommand.commandName}".color(LIGHT_PURPLE))
+                    event.player.sendMessage("Можешь создать такое командой ".colored(GREEN) +
+                            "/${InfinitySpawnEggCommand.commandName}".colored(LIGHT_PURPLE))
                 }
                 event.isCancelled = true
             }
@@ -56,7 +56,7 @@ class InfinitySpawnEgg : Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onBlockBreakEvent(event: BlockBreakEvent) {
         if (event.block.type == Material.SPAWNER && !event.player.hasPermission(Permissions.BREAK_SPAWNERS)) {
-            event.player.sendMessage("Nope".color(RED))
+            event.player.sendMessage("Nope" colored RED)
             event.isCancelled = true
         }
     }

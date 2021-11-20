@@ -2,17 +2,15 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.SERVER
+import me.galaran.nyamine.extension.*
 import me.galaran.nyamine.storage.data.WorldType
-import me.galaran.nyamine.util.*
 import me.galaran.nyamine.util.text.PluralRuForms
-import me.galaran.nyamine.util.text.Symbols
 import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
 import net.ess3.api.events.AfkStatusChangeEvent
-import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.ChatColor.*
-import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.TextComponent
-import net.milkbowl.vault.economy.Economy
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Statistic
@@ -25,17 +23,13 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.util.Vector
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 import me.galaran.nyamine.storage.data.Location as NyaLocation
 
 class PlayerListDecorator(
-    private val plugin: NyaMineFeatures,
-    private val vaultEconomy: Economy
+    private val plugin: NyaMineFeatures
 ) : Listener {
 
     init {
@@ -47,19 +41,22 @@ class PlayerListDecorator(
             val playersOnline = playersOnline()
 
             Bukkit.getOnlinePlayers().forEach {
-                it.setPlayerListHeaderFooter(arrayOf(
-                        titleAndPlayersOnline(playersOnline), LF,
-                        LINE, LF
-                ), arrayOf(
-                        LF,
-                        LF,
-                        LF,
-                        speedLocationAndDeathPoint(it), LF,
-                        LF,
-                        performanceInfo(playerPingMs(it), tpsLastMinute, medianTickTimeMs, totalVillagers), LF,
-                        balanceAndTimePlayed(it), LF,
-                        LINE,
-                ))
+                it.sendPlayerListHeaderAndFooter(
+                    TextComponent.ofChildren(
+                        titleAndPlayersOnline(playersOnline), Component.newline(),
+                        LINE, Component.newline()
+                    ),
+                    TextComponent.ofChildren(
+                        Component.newline(),
+                        Component.newline(),
+                        Component.newline(),
+                        speedLocationAndDeathPoint(it), Component.newline(),
+                        Component.newline(),
+                        performanceInfo(playerPingMs(it), tpsLastMinute, medianTickTimeMs, totalVillagers), Component.newline(),
+                        timePlayed(it), Component.newline(),
+                        LINE
+                    )
+                )
             }
         }, 100, TICKS_PER_UPDATE)
     }
@@ -81,13 +78,13 @@ class PlayerListDecorator(
 
     private fun updatePlayerNameInList(player: Player) {
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            player.setPlayerListName(colorByEnvironment[player.world.environment].toString() + player.playerListName.stripColorCodes())
+            val playerDisplayName = player.playerListName()?.toBasicString() ?: player.name
+            player.playerListName(playerDisplayName colored colorByEnvironment[player.world.environment]!!)
         }, 1)
     }
 
-    private fun titleAndPlayersOnline(playersOnline: Int): BaseComponent {
-        return "                     NyaMine ^_^          Онлайн: $playersOnline".color(GRAY)
-    }
+    private fun titleAndPlayersOnline(playersOnline: Int): Component =
+        "                     NyaMine ^_^          Онлайн: $playersOnline" colored GRAY  // TODO: customizable
 
     private val colorByEnvironment = mapOf(
             World.Environment.NORMAL to GREEN,
@@ -95,70 +92,66 @@ class PlayerListDecorator(
             World.Environment.THE_END to LIGHT_PURPLE
     )
 
-    private fun speedLocationAndDeathPoint(player: Player): BaseComponent {
+    private fun speedLocationAndDeathPoint(player: Player): Component {
         val loc = player.location
         val playerData = plugin.playerStorage[player]
 
-        return TextComponent().apply {
-            calcSpeedBlocksPerSecond(player).let {
-                if (it.absoluteValue >= 0.1) {
-                    addExtra("%.1f      ".format(Locale.US, it))
-                }
+        val builder = Component.text()
+
+        calcSpeedBlocksPerSecond(player).let {
+            if (it.absoluteValue >= 0.1) {
+                builder.append("%.1f      ".format(Locale.US, it) colored WHITE)
             }
-            addExtra(loc.blockX.toString())
-            addExtra(" : ".color(GRAY))
-            addExtra(loc.blockY.toString())
-            addExtra(" : ".color(GRAY))
-            addExtra(loc.blockZ.toString())
+        }
+        builder.append(loc.blockX colored WHITE)
+        builder.append(" : " colored GRAY)
+        builder.append(loc.blockY colored WHITE)
+        builder.append(" : " colored GRAY)
+        builder.append(loc.blockZ colored WHITE)
 
-            val deathPoint: NyaLocation? = playerData.lastDeathPoint
-            if (deathPoint != null) {
-                val worldMatch = loc.world.name == deathPoint.worldName
-                val distanceToDeathPoint = loc.toVector().distance(Vector(deathPoint.x, deathPoint.y, deathPoint.z))
+        val deathPoint: NyaLocation? = playerData.lastDeathPoint
+        if (deathPoint != null) {
+            val worldMatch = loc.world.name == deathPoint.worldName
+            val distanceToDeathPoint = loc.toVector().distance(Vector(deathPoint.x, deathPoint.y, deathPoint.z))
 
-                if (worldMatch && distanceToDeathPoint <= REMOVE_DEATH_POINT_WITHIN_DISTANCE && !player.isDead) {
-                    playerData.lastDeathPoint = null
-                } else {
-                    addExtra("   Death: ".color(DARK_RED))
+            if (worldMatch && distanceToDeathPoint <= REMOVE_DEATH_POINT_WITHIN_DISTANCE && !player.isDead) {
+                playerData.lastDeathPoint = null
+            } else {
+                builder.append("   Death: " colored DARK_RED)
 
-                    val coords = "${deathPoint.x.roundToInt()} ${deathPoint.y.roundToInt()} ${deathPoint.z.roundToInt()}"
-                    addExtra(coords.color(colorByEnvironment[WorldType.toBukkitType(deathPoint.worldType)]!!))
+                val coords = "${deathPoint.x.roundToInt()} ${deathPoint.y.roundToInt()} ${deathPoint.z.roundToInt()}"
+                builder.append(coords colored colorByEnvironment[WorldType.toBukkitType(deathPoint.worldType)]!!)
 
-                    if (worldMatch) {
-                        addExtra("  ~  ${distanceToDeathPoint.roundToInt()}m".color(DARK_RED))
-                    }
+                if (worldMatch) {
+                    builder.append("  ~  ${distanceToDeathPoint.roundToInt()}m" colored DARK_RED)
                 }
             }
         }
+
+        return builder.build()
     }
 
     private fun performanceInfo(playerPingMs: ColoredValue<Int>,
                                 tpsLastMinute: ColoredValue<Double>,
                                 medianTickTimeMs: ColoredValue<Int>,
                                 totalVillagers: ColoredValue<Int>,
-    ): BaseComponent {
+    ): Component {
         val villagersTextComponent = if (totalVillagers.value > 0) {
-            "      ${totalVillagers.value} ${PluralRuForms.VILLAGER.forValue(totalVillagers.value)}".color(totalVillagers.color)
+            "      ${totalVillagers.value} ${PluralRuForms.VILLAGER.forValue(totalVillagers.value)}" colored totalVillagers.color
         } else {
             null
         }
 
-        return "Ping: ".color(GRAY) + playerPingMs.toColoredText() + "ms           ".color(GRAY) +
-                "%.1f".format(Locale.US, tpsLastMinute.value).color(tpsLastMinute.color) + " TPS @ ".color(GRAY) +
-                medianTickTimeMs.toColoredText() + "ms".color(GRAY)
+        return "Ping: ".colored(GRAY) + playerPingMs.toColoredText() + "ms           ".colored(GRAY) +
+                "%.1f".format(Locale.US, tpsLastMinute.value).colored(tpsLastMinute.color) + " TPS @ ".colored(GRAY) +
+                medianTickTimeMs.toColoredText() + "ms".colored(GRAY)
                         .appendNonNull(villagersTextComponent)
     }
 
-    private fun balanceAndTimePlayed(player: Player): BaseComponent {
-        val balanceLong = vaultEconomy.getBalance(player).roundToLong()
+    private fun timePlayed(player: Player): Component {
         val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
 
-        val playedText = "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}".color(GRAY)
-        return if (balanceLong == 0L) {
-            playedText
-        } else {
-            "${BALANCE_FORMATTER.format(balanceLong)} ${Symbols.NYA_CURRENCY}          ".color(GRAY) + playedText
-        }
+        return "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}" colored GRAY
     }
 
     private fun calcSpeedBlocksPerSecond(player: Player): Double {
@@ -173,8 +166,8 @@ class PlayerListDecorator(
 
     private val prevLocationByPlayerUUID = mutableMapOf<UUID, Location>()
 
-    private data class ColoredValue<T : Any>(val value: T, val color: ChatColor) {
-        fun toColoredText() = value.color(color)
+    private data class ColoredValue<T : Any>(val value: T, val color: NamedTextColor) {
+        fun toColoredText() = value colored color
     }
 
     private fun playerPingMs(player: Player): ColoredValue<Int> {
@@ -228,9 +221,6 @@ class PlayerListDecorator(
 
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
-        val LINE = "==================================================".color(GRAY)
-        val LF = TextComponent("\n")
-
-        val BALANCE_FORMATTER = DecimalFormat("###,###", DecimalFormatSymbols.getInstance(Locale.US).apply { groupingSeparator = ' ' })
+        val LINE = "==================================================" colored GRAY
     }
 }
