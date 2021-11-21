@@ -1,5 +1,7 @@
 # NyaMineFeatures configuration file
 
+player-list-title: '&2                     NyaMine Classic ^_^            '
+
 prometheus-stats:
   mined-blocks-counters:
     - emerald_ore

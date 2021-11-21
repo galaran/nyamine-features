@@ -2,7 +2,9 @@ package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.ReturnChorusGrade
+import me.galaran.nyamine.extension.colored
 import net.ess3.api.IEssentials
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.*
 import org.bukkit.boss.BarFlag
 import org.bukkit.boss.BarStyle
@@ -72,7 +74,7 @@ class ReturnChorus(
             val key = NamespacedKey(plugin, "return-chorus-" + UUID.randomUUID())
             Bukkit.createBossBar(
                 key,
-                returnChorusGrade.nameColor.toString() + returnChorusGrade.displayName,
+                LegacyComponentSerializer.legacySection().serialize(returnChorusGrade.displayName colored returnChorusGrade.nameColor),
                 returnChorusGrade.progressBarColor,
                 BarStyle.SEGMENTED_20,
                 BarFlag.CREATE_FOG

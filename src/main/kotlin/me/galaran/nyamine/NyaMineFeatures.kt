@@ -44,7 +44,11 @@ class NyaMineFeatures : JavaPlugin() {
 
         server.pluginManager.registerEvents(PlayerDeathLocation(this), this)
         server.pluginManager.registerEvents(PlayerDropTracker(), this)
-        server.pluginManager.registerEvents(PlayerListDecorator(this), this)
+
+        val playerListDecorator = PlayerListDecorator(this)
+        server.pluginManager.registerEvents(playerListDecorator, this)
+        configListeners += playerListDecorator
+
         server.pluginManager.registerEvents(TransparentItemFrame(), this)
 
         val minecartSpeed = MinecartSpeed()

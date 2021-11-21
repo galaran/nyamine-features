@@ -1,20 +1,24 @@
 package me.galaran.nyamine.feature
 
+import me.galaran.nyamine.ConfigReloadListener
+import me.galaran.nyamine.LOGGER
 import me.galaran.nyamine.NyaMineFeatures
 import me.galaran.nyamine.SERVER
 import me.galaran.nyamine.extension.*
 import me.galaran.nyamine.storage.data.WorldType
+import me.galaran.nyamine.util.text.DurationRichFormatter
 import me.galaran.nyamine.util.text.PluralRuForms
-import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
 import net.ess3.api.events.AfkStatusChangeEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.NamedTextColor.*
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Statistic
 import org.bukkit.World
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.entity.Villager
 import org.bukkit.event.EventHandler
@@ -30,7 +34,7 @@ import me.galaran.nyamine.storage.data.Location as NyaLocation
 
 class PlayerListDecorator(
     private val plugin: NyaMineFeatures
-) : Listener {
+) : Listener, ConfigReloadListener {
 
     init {
         plugin.server.scheduler.runTaskTimer(plugin, Runnable {
@@ -83,8 +87,7 @@ class PlayerListDecorator(
         }, 1)
     }
 
-    private fun titleAndPlayersOnline(playersOnline: Int): Component =
-        "                     NyaMine ^_^          Онлайн: $playersOnline" colored GRAY  // TODO: customizable
+    private fun titleAndPlayersOnline(playersOnline: Int) = title + "Онлайн: $playersOnline".colored(GRAY)
 
     private val colorByEnvironment = mapOf(
             World.Environment.NORMAL to GREEN,
@@ -151,7 +154,7 @@ class PlayerListDecorator(
     private fun timePlayed(player: Player): Component {
         val ticksPlayed = player.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
 
-        return "Наиграно ${TicksToPlayedTextConverter.convert(ticksPlayed)}" colored GRAY
+        return "Наиграно ${DurationRichFormatter.format(ticksPlayed)}" colored GRAY
     }
 
     private fun calcSpeedBlocksPerSecond(player: Player): Double {
@@ -215,6 +218,18 @@ class PlayerListDecorator(
     }
 
     private fun playersOnline(): Int = SERVER.onlinePlayers.count { !it.isVanished }
+
+    private var title: Component = "" colored GRAY
+
+    override fun onConfigReload(config: FileConfiguration) {
+        val newTitleRaw = config.getString("player-list-title")
+        if (newTitleRaw == null) {
+            LOGGER.warning("Configuration value \"player-list-title\" is missing")
+            return
+        }
+
+        title = LegacyComponentSerializer.legacyAmpersand().deserialize(newTitleRaw)
+    }
 
     private companion object {
         const val TICKS_PER_UPDATE: Long = 10

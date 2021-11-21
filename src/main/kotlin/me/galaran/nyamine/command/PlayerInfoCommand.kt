@@ -4,21 +4,21 @@ import me.galaran.nyamine.OfflinePlayerRegistry
 import me.galaran.nyamine.SERVER
 import me.galaran.nyamine.extension.colored
 import me.galaran.nyamine.extension.plus
-import me.galaran.nyamine.util.text.TicksToPlayedTextConverter
+import me.galaran.nyamine.util.text.DurationRichFormatter
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.OfflinePlayer
 import org.bukkit.Statistic
 import org.bukkit.command.CommandSender
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 object PlayerInfoCommand : NyaCommand {
 
     private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-    private val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
         if (args.size != 1) return false
@@ -43,21 +43,24 @@ object PlayerInfoCommand : NyaCommand {
 
     private fun firstPlayedText(target: OfflinePlayer): Component {
         val firstPlayedDateTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(target.firstPlayed),
-                ZoneId.systemDefault()
+            Instant.ofEpochMilli(target.firstPlayed),
+            ZoneOffset.UTC
         )
         return firstPlayedDateTime.format(DATE_FORMATTER) colored DARK_PURPLE
     }
 
     private fun lastSeenText(target: OfflinePlayer, caller: CommandSender): Component {
         val lastSeenDateTime = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(target.lastSeen),
-                ZoneId.systemDefault()
+            Instant.ofEpochMilli(target.lastSeen),
+            ZoneOffset.UTC
         )
         return when {
             target.isOp && !caller.isOp -> "<скрыто>" colored DARK_RED
             target.isOnline -> "Онлайн" colored GREEN
-            else -> "${lastSeenDateTime.format(DATE_TIME_FORMATTER)} MSK" colored LIGHT_PURPLE  // FIXME: Server time zone
+            else -> {
+                val durationToNow = Duration.between(lastSeenDateTime, LocalDateTime.now(ZoneOffset.UTC))
+                DurationRichFormatter.format(durationToNow).colored(LIGHT_PURPLE) + " назад".colored(WHITE)
+            }
         }
     }
 
@@ -66,7 +69,7 @@ object PlayerInfoCommand : NyaCommand {
             "<скрыто>" colored DARK_RED
         } else {
             val ticksPlayed = target.getStatistic(Statistic.PLAY_ONE_MINUTE)  // Name is misleading, actually records ticks played
-            TicksToPlayedTextConverter.convert(ticksPlayed) colored GOLD
+            DurationRichFormatter.format(ticksPlayed) colored GOLD
         }
     }
 

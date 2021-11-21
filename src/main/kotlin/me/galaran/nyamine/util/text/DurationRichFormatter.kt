@@ -2,10 +2,11 @@ package me.galaran.nyamine.util.text
 
 import java.time.Duration
 
-object TicksToPlayedTextConverter {
+object DurationRichFormatter {
 
-    fun convert(ticks: Int): String {
-        val duration = Duration.ofSeconds((ticks / 20).toLong())
+    fun format(ticks: Int): String = format(Duration.ofSeconds((ticks / 20).toLong()))
+
+    fun format(duration: Duration): String {
         val days = duration.toDays().toInt()
         val hours = duration.toHoursPart()
         val minutes = duration.toMinutesPart()
