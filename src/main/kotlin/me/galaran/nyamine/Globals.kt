@@ -19,7 +19,11 @@ object OfflinePlayerRegistry : Listener {
     private val playerUuidByLastName = TreeMap<String, UUID>(String.CASE_INSENSITIVE_ORDER)
 
     fun init(offlinePlayers: Array<OfflinePlayer>) {
-        offlinePlayers.forEach { playerUuidByLastName[it.name!!] = it.uniqueId }
+        for (offlinePlayer in offlinePlayers) {
+            offlinePlayer.name?.let {
+                playerUuidByLastName[it] = offlinePlayer.uniqueId
+            }
+        }
         SERVER.pluginManager.registerEvents(OfflinePlayerRegistry, PLUGIN)
     }
 
