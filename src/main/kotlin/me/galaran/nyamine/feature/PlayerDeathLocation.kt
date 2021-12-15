@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor.YELLOW
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 
 class PlayerDeathLocation(private val plugin: NyaMineFeatures) : Listener {
@@ -18,9 +19,11 @@ class PlayerDeathLocation(private val plugin: NyaMineFeatures) : Listener {
     fun onPlayerDeath(event: PlayerDeathEvent) {
         event.entity.sendMessage(formatDeathLocation(event))
 
-        val deathLoc = event.entity.location
-        plugin.playerStorage[event.entity].lastDeathPoint =
-                if (deathLoc.y >= 0) Location(deathLoc) else null  // Do not save when fall down to void
+        val deathLocation = when (event.entity.lastDamageCause?.cause) {
+            EntityDamageEvent.DamageCause.VOID -> null
+            else -> Location(event.entity.location)
+        }
+        plugin.playerStorage[event.entity].lastDeathPoint = deathLocation
     }
 
     companion object {
