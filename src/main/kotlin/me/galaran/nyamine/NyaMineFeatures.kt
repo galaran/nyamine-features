@@ -1,7 +1,7 @@
 package me.galaran.nyamine
 
 import com.earth2me.essentials.Essentials
-import me.galaran.nyamine.command.*
+import me.galaran.nyamine.command.NyaCommandDispatcher
 import me.galaran.nyamine.feature.*
 import me.galaran.nyamine.storage.PlayerStorageDirectory
 import net.ess3.api.IEssentials
@@ -57,12 +57,7 @@ class NyaMineFeatures : JavaPlugin() {
 
         reloadConf()
 
-        commandDispatcher = NyaCommandDispatcher().apply {
-            registerHandler(NyaAdminCommand)
-            registerHandler(ChorusCommand)
-            registerHandler(InfinitySpawnEggCommand)
-            registerHandler(PlayerInfoCommand)
-        }
+        commandDispatcher = NyaCommandDispatcher()
 
         server.scheduler.runTaskTimerAsynchronously(this, Runnable {
             saveAll()

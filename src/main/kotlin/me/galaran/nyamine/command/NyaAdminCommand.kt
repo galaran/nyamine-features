@@ -3,10 +3,10 @@ package me.galaran.nyamine.command
 import me.galaran.nyamine.PLUGIN
 import org.bukkit.command.CommandSender
 
-object NyaAdminCommand : NyaCommand {
+object NyaAdminCommand : ConsoleSupportedNyaCommand {
 
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
-        if (args.size == 1 && args.first() == "reload") {
+        if (args.first() == "reload") {
             PLUGIN.reloadConf()
             sender.sendMessage("Configuration reloaded!")
             return true
@@ -20,4 +20,5 @@ object NyaAdminCommand : NyaCommand {
 
     override val commandName get() = "nyaadmin"
     override val usageParameters get() = "reload"
+    override val validArgumentCount get() = 1..1
 }

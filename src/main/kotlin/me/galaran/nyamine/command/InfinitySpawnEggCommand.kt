@@ -7,19 +7,11 @@ import me.galaran.nyamine.extension.plus
 import me.galaran.nyamine.util.ItemUtils
 import net.kyori.adventure.text.format.NamedTextColor.*
 import org.bukkit.Material
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-object InfinitySpawnEggCommand : NyaCommand {
+object InfinitySpawnEggCommand : PlayerOnlyNyaCommand {
 
-    override fun execute(sender: CommandSender, args: Array<String>): Boolean {
-        if (args.size != 1) return false
-
-        if (sender !is Player) {
-            sender.sendMessage("Error! Must be executed as a Player")
-            return true
-        }
-
+    override fun execute(sender: Player, args: Array<String>): Boolean {
         val eggType: Material? = ItemUtils.ALL_SPAWN_EGGS.find { it.key.key == args[0] || it.key.toString() == args[0] }
         if (eggType == null) {
             sender.sendMessage("Unknown spawn egg type: ".colored(DARK_RED) + args[0].colored(RED))
@@ -32,7 +24,7 @@ object InfinitySpawnEggCommand : NyaCommand {
         return true
     }
 
-    override fun onTabComplete(sender: CommandSender, args: Array<String>): List<String>? {
+    override fun onTabComplete(sender: Player, args: Array<String>): List<String>? {
         return if (args.size == 1) {
             ItemUtils.ALL_SPAWN_EGGS.map { it.key.key }.filter { it.startsWith(args[0], ignoreCase = true) }
         } else null
@@ -40,4 +32,5 @@ object InfinitySpawnEggCommand : NyaCommand {
 
     override val commandName get() = "infinityspawnegg"
     override val usageParameters get() = "<type>"
+    override val validArgumentCount get() = 1..1
 }

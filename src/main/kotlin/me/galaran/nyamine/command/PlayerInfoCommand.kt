@@ -16,13 +16,11 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
-object PlayerInfoCommand : NyaCommand {
+object PlayerInfoCommand : ConsoleSupportedNyaCommand {
 
     private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
-        if (args.size != 1) return false
-
         val playerName = args[0]
         val uuid = OfflinePlayerRegistry.uuidByLastName(playerName)
         if (uuid == null) {
@@ -81,4 +79,5 @@ object PlayerInfoCommand : NyaCommand {
 
     override val commandName get() = "playerinfo"
     override val usageParameters get() = "<playername>"
+    override val validArgumentCount get() = 1..1
 }

@@ -24,6 +24,10 @@ commands:
     description: Some player info
     permission: nyamine.playerinfo
     permission-message: You do not have permission
+  tpregion:
+    description: Teleport player to the center of region, stored in mca file
+    permission: nyamine.tpregion
+    permission-message: You do not have permission
 
 permissions:
   # Command permissions
@@ -34,6 +38,8 @@ permissions:
   nyamine.infinityspawnegg:
     default: op
   nyamine.playerinfo:
+    default: op
+  nyamine.tpregion:
     default: op
 
   # Passive abilities
