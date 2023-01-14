@@ -4,7 +4,8 @@ description: Sweet features for NyaMine
 authors: [Galaran]
 
 api-version: "1.13"
-depend: [Kotlin, Essentials, PrometheusExporter]
+depend: [Kotlin, Essentials]
+softdepend: [PrometheusExporter]
 main: me.galaran.nyamine.NyaMineFeatures
 
 commands:
@@ -44,4 +45,4 @@ permissions:
 
   # Passive abilities
   nyamine.breakspawners:
-    defaut: op
+    defaut: true

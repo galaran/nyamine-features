@@ -17,7 +17,7 @@ class NyaMineFeatures : JavaPlugin() {
 
     private lateinit var essentials: IEssentials
 
-    private lateinit var prometheusStats: PrometheusStats
+    private var prometheusStats: PrometheusStats? = null
 
     private lateinit var commandDispatcher: NyaCommandDispatcher
 
@@ -38,9 +38,13 @@ class NyaMineFeatures : JavaPlugin() {
 
         server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
         server.pluginManager.registerEvents(InfinitySpawnEgg(), this)
-        prometheusStats = PrometheusStats()
-        server.pluginManager.registerEvents(prometheusStats, this)
-        configListeners += prometheusStats
+
+        if (server.pluginManager.isPluginEnabled("PrometheusExporter")) {
+            prometheusStats = PrometheusStats().also {
+                server.pluginManager.registerEvents(it, this)
+                configListeners += it
+            }
+        }
 
         server.pluginManager.registerEvents(PlayerDeathLocation(this), this)
         server.pluginManager.registerEvents(PlayerDropTracker(), this)
@@ -74,7 +78,7 @@ class NyaMineFeatures : JavaPlugin() {
 
     private fun saveAll() {
         playerStorage.saveAll()
-        prometheusStats.saveDb()
+        prometheusStats?.saveDb()
     }
 
     override fun onDisable() {

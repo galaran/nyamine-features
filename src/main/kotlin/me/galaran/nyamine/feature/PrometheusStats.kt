@@ -58,7 +58,7 @@ class PrometheusStats : Listener, ConfigReloadListener {
     override fun onConfigReload(config: FileConfiguration) {
         minedBlocksToCount = config.getStringList("prometheus-stats.mined-blocks-counters").mapNotNull {
             try {
-                Material.valueOf(it.toUpperCase())
+                Material.valueOf(it.uppercase())
             } catch (ex: IllegalArgumentException) {
                 LOGGER.warning("No material with id $it. Check configuration")
                 null

@@ -13,7 +13,7 @@ class PlayerStorageSingleFile<D : BasePlayerData>(
     filePath: Path,
     private val initialPlayerDataCreator: () -> D,
     playerDataSerializer: KSerializer<D>,
-    additionalSerializers: SerializersModule = EmptySerializersModule
+    additionalSerializers: SerializersModule = EmptySerializersModule()
 ) : FileStorage<DataByPlayer<D>>(
     filePath,
     ::DataByPlayer,

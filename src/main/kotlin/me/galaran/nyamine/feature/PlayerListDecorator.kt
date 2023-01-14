@@ -10,7 +10,6 @@ import me.galaran.nyamine.util.text.DurationRichFormatter
 import me.galaran.nyamine.util.text.PluralRuForms
 import net.ess3.api.events.AfkStatusChangeEvent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.NamedTextColor.*
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -46,11 +45,11 @@ class PlayerListDecorator(
 
             Bukkit.getOnlinePlayers().forEach {
                 it.sendPlayerListHeaderAndFooter(
-                    TextComponent.ofChildren(
+                    Component.textOfChildren(
                         titleAndPlayersOnline(playersOnline), Component.newline(),
                         LINE, Component.newline()
                     ),
-                    TextComponent.ofChildren(
+                    Component.textOfChildren(
                         Component.newline(),
                         Component.newline(),
                         Component.newline(),
@@ -82,7 +81,7 @@ class PlayerListDecorator(
 
     private fun updatePlayerNameInList(player: Player) {
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            val playerDisplayName = player.playerListName()?.toBasicString() ?: player.name
+            val playerDisplayName = player.playerListName().toBasicString()
             player.playerListName(playerDisplayName colored colorByEnvironment[player.world.environment]!!)
         }, 1)
     }

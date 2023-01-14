@@ -111,7 +111,7 @@ private fun ItemStack.toFormattedString(): String {
         val asShulkerBox: ShulkerBox = this.asShulkerBox() ?: return this.toString()
 
         val builder = StringBuilder(this.type.name)
-        asShulkerBox.inventory.contents!!.filterNotNull().forEach { stackInShulker ->
+        asShulkerBox.inventory.contents.filterNotNull().forEach { stackInShulker ->
             builder
                 .append(System.lineSeparator())
                 .append("    ")
