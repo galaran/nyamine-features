@@ -209,8 +209,8 @@ class PlayerListDecorator(
             .sum()
 
         val color = when (totalVillagers) {
-            in 0..39 -> GRAY
-            in 40..79 -> GOLD
+            in 0..199 -> GRAY
+            in 200..299 -> GOLD
             else -> RED
         }
         return ColoredValue(totalVillagers, color)
