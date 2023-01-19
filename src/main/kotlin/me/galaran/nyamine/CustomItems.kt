@@ -49,8 +49,8 @@ object CustomItems {
         }
     }
 
-    fun createArrowWithTorch(type: ArrowWithTorchType): ItemStack {
-        return Material.ARROW.stackOfOne().updateMeta { meta ->
+    fun createArrowWithTorch(type: ArrowWithTorchType, amount: Int): ItemStack {
+        return ItemStack(Material.ARROW, amount).updateMeta { meta ->
             meta.displayName(type.displayString())
             meta.addEnchant(ArrowWithTorchType.ARROW_ENCHANTMENT, 1, true)
         }
@@ -94,14 +94,14 @@ object CustomItems {
         }
 
         private fun arrowWithTorch(): ShapelessRecipe {
-            return ShapelessRecipe(ARROW_WITH_TORCH, createArrowWithTorch(ArrowWithTorchType.FIRE))
+            return ShapelessRecipe(ARROW_WITH_TORCH, createArrowWithTorch(ArrowWithTorchType.FIRE, 4))
                 .addIngredient(4, Material.ARROW.stackOfOne())
                 .addIngredient(4, Material.TORCH.stackOfOne())
                 .addIngredient(Material.SLIME_BALL.stackOfOne())
         }
 
         private fun arrowWithSoulTorch(): ShapelessRecipe {
-            return ShapelessRecipe(ARROW_WITH_SOUL_TORCH, createArrowWithTorch(ArrowWithTorchType.SOUL_FIRE))
+            return ShapelessRecipe(ARROW_WITH_SOUL_TORCH, createArrowWithTorch(ArrowWithTorchType.SOUL_FIRE, 4))
                 .addIngredient(4, Material.ARROW.stackOfOne())
                 .addIngredient(4, Material.SOUL_TORCH.stackOfOne())
                 .addIngredient(Material.SLIME_BALL.stackOfOne())
