@@ -38,6 +38,7 @@ class NyaMineFeatures : JavaPlugin() {
 
         server.pluginManager.registerEvents(ReturnChorus(this, essentials), this)
         server.pluginManager.registerEvents(InfinitySpawnEgg(), this)
+        server.pluginManager.registerEvents(ArrowWithTorch(), this)
 
         if (server.pluginManager.isPluginEnabled("PrometheusExporter")) {
             prometheusStats = PrometheusStats().also {

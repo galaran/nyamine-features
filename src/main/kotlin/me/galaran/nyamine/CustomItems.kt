@@ -49,15 +49,26 @@ object CustomItems {
         }
     }
 
+    fun createArrowWithTorch(type: ArrowWithTorchType): ItemStack {
+        return Material.ARROW.stackOfOne().updateMeta { meta ->
+            meta.displayName(type.displayString())
+            meta.addEnchant(ArrowWithTorchType.ARROW_ENCHANTMENT, 1, true)
+        }
+    }
+
     object Recipies {
         private val RETURN_CHORUS_COMMON = NamespacedKey(PLUGIN, "return_chorus_common")
         private val RETURN_CHORUS_FAST = NamespacedKey(PLUGIN, "return_chorus_fast")
         private val TRANSPARENT_ITEM_FRAME = NamespacedKey(PLUGIN, "transparent_item_frame")
+        private val ARROW_WITH_TORCH = NamespacedKey(PLUGIN, "arrow_with_torch")
+        private val ARROW_WITH_SOUL_TORCH = NamespacedKey(PLUGIN, "arrow_with_soul_torch")
 
         fun registerAll() {
             Bukkit.addRecipe(returnChorusCommon())
             Bukkit.addRecipe(returnChorusFast())
             Bukkit.addRecipe(transparentItemFrame())
+            Bukkit.addRecipe(arrowWithTorch())
+            Bukkit.addRecipe(arrowWithSoulTorch())
         }
 
         private fun returnChorusCommon(): ShapedRecipe {
@@ -82,6 +93,20 @@ object CustomItems {
                 .addIngredient(Material.GLASS_PANE.stackOfOne())
         }
 
+        private fun arrowWithTorch(): ShapelessRecipe {
+            return ShapelessRecipe(ARROW_WITH_TORCH, createArrowWithTorch(ArrowWithTorchType.FIRE))
+                .addIngredient(4, Material.ARROW.stackOfOne())
+                .addIngredient(4, Material.TORCH.stackOfOne())
+                .addIngredient(Material.SLIME_BALL.stackOfOne())
+        }
+
+        private fun arrowWithSoulTorch(): ShapelessRecipe {
+            return ShapelessRecipe(ARROW_WITH_SOUL_TORCH, createArrowWithTorch(ArrowWithTorchType.SOUL_FIRE))
+                .addIngredient(4, Material.ARROW.stackOfOne())
+                .addIngredient(4, Material.SOUL_TORCH.stackOfOne())
+                .addIngredient(Material.SLIME_BALL.stackOfOne())
+        }
+
         class Discoverer : Listener {
 
             @EventHandler(priority = EventPriority.MONITOR)
@@ -89,7 +114,9 @@ object CustomItems {
                 event.player.discoverRecipes(listOf(
                     RETURN_CHORUS_COMMON,
                     RETURN_CHORUS_FAST,
-                    TRANSPARENT_ITEM_FRAME
+                    TRANSPARENT_ITEM_FRAME,
+                    ARROW_WITH_TORCH,
+                    ARROW_WITH_SOUL_TORCH
                 ))
             }
         }
