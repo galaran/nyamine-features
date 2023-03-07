@@ -3,13 +3,13 @@ package me.galaran.nyamine.feature
 import me.galaran.nyamine.ArrowWithTorchType
 import me.galaran.nyamine.PLUGIN
 import me.galaran.nyamine.extension.stackOfOne
-import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.Directional
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -32,6 +32,8 @@ class ArrowWithTorch : Listener {
 
         event.projectile.persistentDataContainer.set(PROJECTILE_ATTRIBUTE_KEY, PersistentDataType.BYTE, arrowWithTorchType.dataValue)
         event.projectile.isVisualFire = true
+
+        event.setConsumeItem(true)  // Ignore Infinity enchantment
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -40,7 +42,7 @@ class ArrowWithTorch : Listener {
         val arrowWithTorchType = ArrowWithTorchType.byDataValue(dataValue)
 
         if (event.hitBlock != null && event.hitBlockFace != null) {
-            if (tryPlaceTorch(event.hitBlock!!, event.hitBlockFace!!, event.entity.location, arrowWithTorchType)) {
+            if (tryPlaceTorch(event.hitBlock!!, event.hitBlockFace!!, event.entity, arrowWithTorchType)) {
                 event.entity.remove()
                 return
             }
@@ -51,7 +53,7 @@ class ArrowWithTorch : Listener {
     private fun tryPlaceTorch(
         block: Block,
         blockFace: BlockFace,
-        arrowLocation: Location,
+        arrow: Projectile,
         arrowWithTorchType: ArrowWithTorchType
     ): Boolean {
         if (blockFace == BlockFace.DOWN) return false
@@ -67,7 +69,15 @@ class ArrowWithTorch : Listener {
                 torchBlockData.facing = blockFace
                 blockToPlaceTorch.blockData = torchBlockData
             }
-            arrowLocation.world.playSound(arrowLocation, Sound.BLOCK_SLIME_BLOCK_FALL, 1f, 1f)
+
+            arrow.location.world.playSound(arrow.location, Sound.ENTITY_BLAZE_SHOOT, 1f, 1f)
+            arrowWithTorchType.ambientSound?.let {
+                val shooter = arrow.shooter
+                if (shooter is Player) {
+                    shooter.location.world.playSound(shooter.location, it, 1f, 1f)
+                }
+            }
+
             return true
         }
         return false
@@ -75,7 +85,7 @@ class ArrowWithTorch : Listener {
 
     private fun dropTorch(arrow: Projectile, type: ArrowWithTorchType) {
         arrow.isVisualFire = false
-        arrow.world.playSound(arrow.location, Sound.ENTITY_SLIME_SQUISH, 1f, 1f)
+        arrow.world.playSound(arrow.location, Sound.BLOCK_REDSTONE_TORCH_BURNOUT, 1f, 1f)
         arrow.world.dropItem(arrow.location, type.torchMaterial.stackOfOne())
     }
 }

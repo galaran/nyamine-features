@@ -4,6 +4,7 @@ import me.galaran.nyamine.extension.colored
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 
@@ -12,10 +13,13 @@ enum class ArrowWithTorchType(
     val torchMaterial: Material,
     val wallTorchMaterial: Material,
     private val displayName: String,
-    private val displayColor: NamedTextColor
+    private val displayColor: NamedTextColor,
+    val ambientSound: Sound?
 ) {
-    FIRE(0, Material.TORCH, Material.WALL_TORCH, "Стрела с факелом", NamedTextColor.GOLD),
-    SOUL_FIRE(1, Material.SOUL_TORCH, Material.SOUL_WALL_TORCH, "Стрела с факелом душ", NamedTextColor.AQUA);
+    FIRE(0, Material.TORCH, Material.WALL_TORCH, "Стрела с факелом",
+        NamedTextColor.GOLD, null),
+    SOUL_FIRE(1, Material.SOUL_TORCH, Material.SOUL_WALL_TORCH, "Стрела с факелом душ",
+        NamedTextColor.AQUA, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD);
 
     fun displayString(): TextComponent = displayName colored displayColor
 

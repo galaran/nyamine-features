@@ -97,14 +97,14 @@ object CustomItems {
             return ShapelessRecipe(ARROW_WITH_TORCH, createArrowWithTorch(ArrowWithTorchType.FIRE, 4))
                 .addIngredient(4, Material.ARROW.stackOfOne())
                 .addIngredient(4, Material.TORCH.stackOfOne())
-                .addIngredient(Material.SLIME_BALL.stackOfOne())
+                .addIngredient(Material.STRING.stackOfOne())
         }
 
         private fun arrowWithSoulTorch(): ShapelessRecipe {
             return ShapelessRecipe(ARROW_WITH_SOUL_TORCH, createArrowWithTorch(ArrowWithTorchType.SOUL_FIRE, 4))
                 .addIngredient(4, Material.ARROW.stackOfOne())
                 .addIngredient(4, Material.SOUL_TORCH.stackOfOne())
-                .addIngredient(Material.SLIME_BALL.stackOfOne())
+                .addIngredient(Material.STRING.stackOfOne())
         }
 
         class Discoverer : Listener {
