@@ -114,7 +114,7 @@ Permission: `nyamine.tpregion` (default to OPs only).
 
 Examples:  
 `/tpregion 0 0` - teleports to x = 256, z = 256 (current world, y = highest block at this x/z + 10)  
-`tpregion 29 -11` - teleports to x = 15104, z = -5376
+`/tpregion 29 -11` - teleports to x = 15104, z = -5376
 
 ### Reload configuration command
 All configuration in `config.yml` can be reloaded without server restart with command `/nyaadmin reload`
