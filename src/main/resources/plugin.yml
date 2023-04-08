@@ -26,7 +26,7 @@ commands:
     permission: nyamine.playerinfo
     permission-message: You do not have permission
   tpregion:
-    description: Teleport player to the center of region, stored in mca file
+    description: Teleports player to the center of region, stored in mca file
     permission: nyamine.tpregion
     permission-message: You do not have permission
 
