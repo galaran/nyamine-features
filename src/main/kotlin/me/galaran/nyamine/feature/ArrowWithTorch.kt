@@ -1,7 +1,9 @@
 package me.galaran.nyamine.feature
 
 import me.galaran.nyamine.ArrowWithTorchType
+import me.galaran.nyamine.CustomItems
 import me.galaran.nyamine.PLUGIN
+import me.galaran.nyamine.extension.hasInfinityEnchantment
 import me.galaran.nyamine.extension.stackOfOne
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
@@ -33,7 +35,11 @@ class ArrowWithTorch : Listener {
         event.projectile.persistentDataContainer.set(PROJECTILE_ATTRIBUTE_KEY, PersistentDataType.BYTE, arrowWithTorchType.dataValue)
         event.projectile.isVisualFire = true
 
-        event.setConsumeItem(true)  // Ignore Infinity enchantment
+        if (event.bow.hasInfinityEnchantment()) {
+            (event.entity as Player).inventory.removeItemAnySlot(
+                CustomItems.createArrowWithTorch(arrowWithTorchType, 1)
+            )
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

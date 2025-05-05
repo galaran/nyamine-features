@@ -31,7 +31,7 @@ class InfinitySpawnEgg : Listener {
 
         val clickedBlockType: Material? = event.clickedBlock?.type
 
-        if (Enchantment.ARROW_INFINITE in usedItem.enchantments.keys) {
+        if (Enchantment.INFINITY in usedItem.enchantments.keys) {
             if (clickedBlockType == Material.SPAWNER) {
                 with(event.clickedBlock!!.location) {
                     LOGGER.info("${event.player.name} used infinity spawn egg ${usedItem.type.key}"

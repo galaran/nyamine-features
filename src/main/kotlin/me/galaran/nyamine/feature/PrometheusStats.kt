@@ -32,7 +32,7 @@ class PrometheusStats : Listener, ConfigReloadListener {
             val playerUUID = event.player.uniqueId.toString()
             val blockId = event.block.type.key.key
 
-            val newCount = storage[event.player].blocksMined.compute(blockId, { _, count: Int? -> (count ?: 0) + 1 })!!
+            val newCount = storage[event.player].blocksMined.compute(blockId) { _, count: Int? -> (count ?: 0) + 1 }!!
 
             blocksMined.labels(playerName, playerUUID, blockId).set(newCount.toDouble())
         }

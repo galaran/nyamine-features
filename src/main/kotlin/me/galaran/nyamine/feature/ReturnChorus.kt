@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 class ReturnChorus(
         private val plugin: NyaMineFeatures,
@@ -45,12 +46,21 @@ class ReturnChorus(
                     val player: Player? = Bukkit.getPlayer(playerId)
                     if (player != null && player.isOnline) {
                         val user = essentials.getUser(player)
-                        user.teleport.respawn(null, PlayerTeleportEvent.TeleportCause.COMMAND)
 
-                        with(player.location) {
-                            this.world.playEffect(this, Effect.ENDER_SIGNAL, 0, 128)
-                            this.world.playSound(this, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f)
+                        val teleportCallback = CompletableFuture<Boolean>().apply {
+                            thenAccept { success ->
+                                if (success) {
+                                    with(player.location) {
+                                        this.world.playEffect(this, Effect.ENDER_SIGNAL, 0, 128)
+                                        this.world.playSound(this, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f)
+                                    }
+                                }
+                            }
                         }
+
+                        user.asyncTeleport.respawn(null, PlayerTeleportEvent.TeleportCause.COMMAND, teleportCallback)
+
+
                     }
                 } else if (teleportData.progressBarKey != null) {
                     val newProgress = (currentServerTick - teleportData.teleportStartTick) / teleportData.teleportDelayTicks.toDouble()
@@ -117,7 +127,7 @@ class ReturnChorus(
     private fun ItemStack.getReturnChorusGrade(): ReturnChorusGrade? {
         if (this.type != Material.CHORUS_FRUIT) return null
 
-        val effLevel = this.enchantments[Enchantment.DIG_SPEED] ?: return null
+        val effLevel = this.enchantments[Enchantment.EFFICIENCY] ?: return null
         return when {
             effLevel >= ReturnChorusGrade.INSTANT.enchantLevel -> ReturnChorusGrade.INSTANT
             effLevel >= ReturnChorusGrade.FAST.enchantLevel -> ReturnChorusGrade.FAST

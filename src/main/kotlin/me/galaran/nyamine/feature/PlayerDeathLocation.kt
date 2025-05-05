@@ -29,8 +29,8 @@ class PlayerDeathLocation(private val plugin: NyaMineFeatures) : Listener {
     companion object {
         fun formatDeathLocation(event: PlayerDeathEvent): Component {
             with(event.entity.location) {
-                return "Death location: ".colored(YELLOW) + "$blockX $blockY $blockZ".colored(RED) +
-                        " at ".colored(YELLOW) + world.name.colored(RED)
+                return "Смерть: ".colored(YELLOW) + "$blockX $blockY $blockZ".colored(RED) +
+                        " в мире ".colored(YELLOW) + world.name.colored(RED)
             }
         }
     }

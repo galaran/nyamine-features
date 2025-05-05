@@ -119,7 +119,7 @@ class PlayerListDecorator(
             if (worldMatch && distanceToDeathPoint <= REMOVE_DEATH_POINT_WITHIN_DISTANCE && !player.isDead) {
                 playerData.lastDeathPoint = null
             } else {
-                builder.append("   Death: " colored DARK_RED)
+                builder.append("   $SKULL_CHARACTER " colored DARK_RED)
 
                 val coords = "${deathPoint.x.roundToInt()} ${deathPoint.y.roundToInt()} ${deathPoint.z.roundToInt()}"
                 builder.append(coords colored colorByEnvironment[WorldType.toBukkitType(deathPoint.worldType)]!!)
@@ -173,7 +173,7 @@ class PlayerListDecorator(
     }
 
     private fun playerPingMs(player: Player): ColoredValue<Int> {
-        val pingMs = player.spigot().ping
+        val pingMs = player.ping
         val color = when (pingMs) {
             in 0..49 -> GRAY
             in 50..399 -> GOLD
@@ -236,5 +236,6 @@ class PlayerListDecorator(
         const val REMOVE_DEATH_POINT_WITHIN_DISTANCE = 5.0
 
         val LINE = "==================================================" colored GRAY
+        const val SKULL_CHARACTER = '\u2620'
     }
 }

@@ -27,7 +27,7 @@ object CustomItems {
             grade.lore?.let {
                 meta.lore(listOf(Component.text(it)))
             }
-            meta.addEnchant(Enchantment.DIG_SPEED, grade.enchantLevel, true)
+            meta.addEnchant(Enchantment.EFFICIENCY, grade.enchantLevel, true)
         }
     }
 
@@ -45,7 +45,7 @@ object CustomItems {
                 "Может быть использовано только" colored GREEN,
                 "на спавнере ".colored(GREEN) + "(при этом расходуется)".colored(DARK_RED)
             ))
-            meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true)
+            meta.addEnchant(Enchantment.INFINITY, 1, true)
         }
     }
 
